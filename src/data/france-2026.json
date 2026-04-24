@@ -186,5 +186,42 @@
       "effectivelyValuable": true,
       "note": "Allocations familiales dès 2e enfant, CAF, crèches subventionnées"
     }
+  },
+
+  "costOfLiving_Paris_2026_EUR": {
+    "rent_studio_center_monthly": 1300,
+    "rent_1br_center_monthly": 1800,
+    "rent_1br_periphery_monthly": 1200,
+    "rent_2br_center_monthly": 2600,
+    "rent_2br_periphery_monthly": 1700,
+    "rent_3br_center_monthly": 3800,
+    "rent_3br_periphery_monthly": 2400,
+    "rent_4br_center_monthly": 5500,
+    "rent_4br_periphery_monthly": 3200,
+    "groceries_single_monthly": 420,
+    "restaurant_midrange_2pax": 70,
+    "utilities_monthly": 140,
+    "internet_monthly": 35,
+    "transport_public_monthly": 88,
+    "gym_monthly": 45,
+    "healthInsurance_private_monthly": 60,
+    "diningOut_low_monthly": 80,
+    "diningOut_medium_monthly": 250,
+    "diningOut_high_monthly": 600,
+    "car_monthly_estimate": 400
+  },
+
+  "infrastructureScore": {
+    "internet": 8,
+    "publicTransport": 9,
+    "banking_foreigners": 6,
+    "coworking": 9,
+    "fintech_ecosystem": 8
+  },
+
+  "qualityOfLife_Paris_2026": {
+    "healthcareQuality": 8,
+    "safety": 6,
+    "note": "Santé publique solide. Sécurité perçue en baisse dans certains arrondissements centraux (petite criminalité, pickpockets)."
   }
 }

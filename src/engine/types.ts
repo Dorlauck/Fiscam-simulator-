@@ -40,6 +40,14 @@ export interface StructureResult {
   suggestedStructure?: string;
 }
 
+export interface LifestyleInput {
+  housingType: "studio" | "t2" | "t3" | "t4";
+  location: "center" | "periphery";
+  carOwnership: boolean;
+  privateHealthcare: boolean;
+  diningOutFrequency: "low" | "medium" | "high";
+}
+
 export interface SimulationInput {
   profile: Profile;
   revenue: {
@@ -61,4 +69,5 @@ export interface SimulationInput {
     isNonDom?: boolean;
     residencyYears?: number;
   };
+  lifestyle?: LifestyleInput;
 }
