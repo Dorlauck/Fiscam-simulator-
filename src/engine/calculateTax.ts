@@ -58,6 +58,7 @@ export function calculateTax(input: SimulationInput): StructureResult {
         businessExpenses: revenue.businessExpensesAnnual,
         salaryBrutAnnual: salary || 60_000,
         dividendTarget: dividend,
+        dividendNetTarget: compensation?.dividendNetTarget,
         familyStatus: personal.familyStatus,
         children: personal.children,
       },

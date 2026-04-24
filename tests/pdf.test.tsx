@@ -17,6 +17,8 @@ const form: FormState = {
   familyStatus: "single",
   children: 0,
   age: 35,
+  salaryBrutAnnual: 45_000,
+  dividendNetTarget: 20_000,
   lifestyle: {
     housingType: "t2",
     location: "center",

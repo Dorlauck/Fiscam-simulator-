@@ -31,7 +31,10 @@ interface SasuInput {
   revenueGross: number;
   businessExpenses: number;
   salaryBrutAnnual: number;
-  dividendTarget: number;
+  /** Dividende cible BRUT (avant PFU). */
+  dividendTarget?: number;
+  /** Dividende NET cible (après PFU) — prioritaire si fourni. Le moteur reverse-calcule le brut. */
+  dividendNetTarget?: number;
   familyStatus: FamilyStatus;
   children: number;
 }
@@ -39,6 +42,7 @@ interface SasuInput {
 export function calculateSASU(input: SasuInput, data: FranceSasuData): StructureResult {
   const warnings: string[] = [];
   const pres = data.sasu_is.presidentAssimileSalarie;
+  const pfuRate = data.sasu_is.dividendes.pfu_2026_increased;
 
   // 1. Charges sociales (assimilé-salarié)
   const employerContrib = input.salaryBrutAnnual * pres.employerContributions_approx;
@@ -78,13 +82,21 @@ export function calculateSASU(input: SasuInput, data: FranceSasuData): Structure
   const profitAfterIS = Math.max(0, profitBeforeIS - corporateTax);
 
   // 4. Distribution dividendes + PFU 2026 (31.4%)
-  const dividendDistributed = Math.min(Math.max(0, input.dividendTarget), profitAfterIS);
-  if (input.dividendTarget > profitAfterIS) {
+  //    Si dividendNetTarget fourni : reverse-calc brut = net / (1 - pfuRate).
+  //    Sinon : dividendTarget (brut direct) ou 0.
+  let dividendGrossWanted = 0;
+  if (input.dividendNetTarget !== undefined && input.dividendNetTarget > 0) {
+    dividendGrossWanted = input.dividendNetTarget / (1 - pfuRate);
+  } else if (input.dividendTarget !== undefined && input.dividendTarget > 0) {
+    dividendGrossWanted = input.dividendTarget;
+  }
+  const dividendDistributed = Math.min(dividendGrossWanted, profitAfterIS);
+  if (dividendGrossWanted > profitAfterIS + 0.5) {
+    const netAchievable = profitAfterIS * (1 - pfuRate);
     warnings.push(
-      `Dividende cible (${input.dividendTarget.toLocaleString("fr-FR")}€) supérieur au bénéfice distribuable (${Math.round(profitAfterIS).toLocaleString("fr-FR")}€).`
+      `Dividende cible trop élevé : bénéfice distribuable ${Math.round(profitAfterIS).toLocaleString("fr-FR")}€ ne permet qu'un net de ${Math.round(netAchievable).toLocaleString("fr-FR")}€ après PFU 31.4%.`
     );
   }
-  const pfuRate = data.sasu_is.dividendes.pfu_2026_increased;
   const dividendTax = dividendDistributed * pfuRate;
   const dividendNet = dividendDistributed - dividendTax;
 

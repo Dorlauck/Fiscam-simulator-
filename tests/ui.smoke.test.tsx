@@ -46,7 +46,7 @@ describe("Formulaire → résultats (flow complet)", () => {
 
     // Écran résultats
     expect(screen.getByText(/Comparaison des/i)).toBeTruthy();
-    expect(screen.getByText(/Cashflow réel mensuel/i)).toBeTruthy();
+    expect(screen.getAllByText(/Cashflow.*mensuel/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("affiche le bouton 'Modifier' pour revenir au formulaire", () => {

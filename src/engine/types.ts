@@ -121,6 +121,8 @@ export interface SimulationInput {
   compensation?: {
     salaryBrutAnnual?: number;
     dividendTarget?: number;
+    /** Dividende NET souhaité (après PFU) — le moteur calcule le brut. Prioritaire sur dividendTarget. */
+    dividendNetTarget?: number;
   };
   personal: {
     familyStatus: FamilyStatus;

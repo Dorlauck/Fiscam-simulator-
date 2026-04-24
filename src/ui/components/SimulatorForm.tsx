@@ -153,7 +153,42 @@ export function SimulatorForm(props: Props) {
             </div>
           </div>
 
-          <div className="row mt-4" style={{ justifyContent: "flex-end" }}>
+          <div className="mt-5">
+            <h4 style={{ marginBottom: "8px" }}>{t("form.comp.title")}</h4>
+            <p className="text-muted" style={{ fontSize: "0.85rem", margin: "0 0 12px" }}>
+              {t("form.comp.hint")}
+            </p>
+            <div className="grid-2">
+              <div>
+                <label>{t("form.comp.salary.label")}</label>
+                <input
+                  type="number"
+                  value={form.salaryBrutAnnual}
+                  min={0}
+                  step={5_000}
+                  onChange={(e) => update("salaryBrutAnnual", Number(e.target.value))}
+                />
+                <p className="text-dim" style={{ fontSize: "0.72rem", marginTop: "4px" }}>
+                  {t("form.comp.salary.hint")}
+                </p>
+              </div>
+              <div>
+                <label>{t("form.comp.divNet.label")}</label>
+                <input
+                  type="number"
+                  value={form.dividendNetTarget}
+                  min={0}
+                  step={1_000}
+                  onChange={(e) => update("dividendNetTarget", Number(e.target.value))}
+                />
+                <p className="text-dim" style={{ fontSize: "0.72rem", marginTop: "4px" }}>
+                  {t("form.comp.divNet.hint")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="row mt-5" style={{ justifyContent: "flex-end" }}>
             <button data-variant="primary" onClick={onNext}>
               {t("form.next")}
             </button>
