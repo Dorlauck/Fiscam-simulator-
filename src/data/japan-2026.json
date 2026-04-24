@@ -1,0 +1,229 @@
+{
+  "meta": {
+    "country": "Japan",
+    "city": "Tokyo",
+    "currency": "JPY",
+    "fiscalYear": 2026,
+    "lastUpdated": "2026-04-24",
+    "exchangeRate_EUR_JPY": 163,
+    "sources": [
+      "Japan National Tax Agency (NTA)",
+      "PwC Japan Tax Summaries 2026",
+      "JETRO Section 3 Taxes",
+      "EY FY2026 Japan Tax Reform Outline (Dec 2025)"
+    ]
+  },
+
+  "residencyCategories": {
+    "nonResident": {
+      "duration": "< 1 year in Japan",
+      "taxedOn": "Japan-source income only",
+      "flatRateEmploymentIncome": 0.2042,
+      "note": "Taux fixe 20.42% sur salaire japonais, pas de déductions"
+    },
+    "nonPermanentResident": {
+      "duration": "< 5 years cumulated in last 10 years",
+      "taxedOn": "Japan-source income + foreign income REMITTED to Japan",
+      "note": "Régime favorable pour les étrangers les 5 premières années. Équivalent du non-dom de Malte mais limité dans le temps."
+    },
+    "permanentResident_taxPurpose": {
+      "duration": "> 5 years cumulated",
+      "taxedOn": "Worldwide income",
+      "note": "Attention : différent du statut d'immigration Permanent Resident."
+    }
+  },
+
+  "nationalIncomeTaxBrackets_2026_JPY": [
+    { "min": 0,         "max": 1950000,   "rate": 0.05,  "deduction": 0 },
+    { "min": 1950000,   "max": 3300000,   "rate": 0.10,  "deduction": 97500 },
+    { "min": 3300000,   "max": 6950000,   "rate": 0.20,  "deduction": 427500 },
+    { "min": 6950000,   "max": 9000000,   "rate": 0.23,  "deduction": 636000 },
+    { "min": 9000000,   "max": 18000000,  "rate": 0.33,  "deduction": 1536000 },
+    { "min": 18000000,  "max": 40000000,  "rate": 0.40,  "deduction": 2796000 },
+    { "min": 40000000,  "max": null,      "rate": 0.45,  "deduction": 4796000 }
+  ],
+
+  "basicDeduction_2026_JPY": 620000,
+  "basicDeduction_2025_JPY": 580000,
+
+  "employmentIncomeDeduction_minimumGuaranteed_2026_JPY": 690000,
+
+  "reconstructionSurtax": {
+    "rate": 0.021,
+    "appliesTo": "National income tax amount",
+    "validUntil": "2037-12-31",
+    "note": "Surtaxe de 2.1% du montant de l'IR national (pas du revenu). Finance la reconstruction post-tsunami 2011."
+  },
+
+  "localInhabitantTax": {
+    "rate_flat": 0.10,
+    "prefectural": 0.04,
+    "municipal": 0.06,
+    "perCapita_JPY": 5000,
+    "forestEnvironmentalTax_JPY": 1000,
+    "note": "Flat 10% sur revenu imposable + ~6000¥/an fixe. Basé sur résidence au 1er janvier."
+  },
+
+  "combinedMaxRate_2026": {
+    "national_top": 0.45,
+    "surtax_on_national": 0.021,
+    "national_withSurtax": 0.4594,
+    "localInhabitant": 0.10,
+    "combined_top": 0.5594,
+    "note": "~56% marginal pour les plus hauts revenus. Élevé."
+  },
+
+  "selfEmployed": {
+    "businessIncomeCategory": "事業所得 (jigyoushotoku)",
+    "blueReturnSystem": {
+      "available": true,
+      "deduction_annual_JPY": 650000,
+      "conditions": "Double-entry bookkeeping + electronic filing",
+      "note": "Déduction spéciale 65万円 — gros avantage pour freelances"
+    },
+    "whiteReturnSystem": {
+      "available": true,
+      "deduction_annual_JPY": 100000,
+      "note": "Plus simple mais moins avantageux"
+    },
+    "enterpriseTax_prefectural": {
+      "rate": 0.05,
+      "appliesIf_businessIncomeOver_JPY": 2900000,
+      "note": "Taxe prefectural sur entreprise indépendante au-delà de 290万円 de bénéfices"
+    },
+    "consumptionTax_VAT": {
+      "rate_standard": 0.10,
+      "rate_reduced_food": 0.08,
+      "exemptionThreshold_JPY": 10000000,
+      "note": "Entrepreneurs avec CA < 10M¥ exemptés de consumption tax (sauf inscrits volontairement)"
+    }
+  },
+
+  "corporateTax_KK_GK": {
+    "national_corporateTax": {
+      "rate_standard": 0.232,
+      "rate_SME_under8M_income": 0.15,
+      "SME_eligibility": "Capital <= 100M JPY"
+    },
+    "localCorporateTax": 0.103,
+    "enterpriseTax_approx": 0.03,
+    "inhabitantsTax_corp": 0.07,
+    "effectiveCombinedRate_approx": 0.34,
+    "note": "Taux effectif combiné ~34% pour PME. Plus que France ou UK."
+  },
+
+  "dividendTax": {
+    "domesticDividends_withheld": 0.20315,
+    "note": "Dividendes d'actions japonaises : retenue 20.315% (15.315% national + 5% local) au versement. Option d'imposition globale possible si plus avantageux."
+  },
+
+  "socialInsurance": {
+    "healthInsurance_kenkouhoken": {
+      "rate_Tokyo_2026_approx": 0.1,
+      "employer_employee_split": "50/50 pour salariés",
+      "note": "Travailleurs indépendants payent 100% (Kokumin Kenkou Hoken, basé sur revenu année précédente)",
+      "capAnnual_JPY": 1040000,
+      "classification": "effectivelyValuable",
+      "qualityOfCare": 9,
+      "outOfPocketShare": 0.30
+    },
+    "pension_kokuminNenkin": {
+      "monthlyFixed_JPY_2026": 16980,
+      "annualTotal_JPY": 203760,
+      "note": "Forfait mensuel fixe pour indépendants (différent du Kousei Nenkin salarié qui est proportionnel)",
+      "classification": "nominallyValuable",
+      "demographicChallenge": "Ratio actifs/retraités: 1.6 en 2025, projeté 1.1 en 2050",
+      "maxBenefit_monthly_JPY": 67000
+    },
+    "longTermCareInsurance": {
+      "rate_applies_from_age": 40,
+      "rate_approx": 0.02
+    },
+    "unemploymentInsurance": {
+      "note": "Non disponible pour self-employed"
+    }
+  },
+
+  "exitTax_Japan": {
+    "exists": true,
+    "trigger": "Résident fiscal du Japon avec actifs financiers > 100M JPY quittant le Japon",
+    "rate": "Comme si tous les actifs financiers étaient vendus à la date de sortie (gains taxés à 15.315% + 5%)",
+    "deferral_possible": true,
+    "impactScore": 7
+  },
+
+  "international_tourist_tax": {
+    "ratePerDeparture_JPY_from_2026": 3000,
+    "ratePerDeparture_JPY_before": 1000,
+    "note": "Taxe de sortie à chaque départ. Mineur."
+  },
+
+  "inheritanceTax": {
+    "applies": true,
+    "ratesMax": 0.55,
+    "appliesToForeignersAfter": "10 years of residency",
+    "warning": "Japon a l'une des inheritance tax les plus lourdes au monde (55% top rate). Big red flag pour entrepreneurs fortunés."
+  },
+
+  "socialSecurityPerception": {
+    "healthcare": {
+      "classification": "effectivelyValuable",
+      "quality": 9,
+      "access": 9,
+      "reason": "Accès universel, 30% reste à charge, très bon niveau médical"
+    },
+    "retirement": {
+      "classification": "nominallyValuable",
+      "reason": "Japon a le pire ratio démographique du monde développé (vieillissement rapide + natalité basse). Pension future incertaine.",
+      "maxBenefit_kokumin_monthly_JPY": 67000,
+      "note": "Le Kokumin Nenkin max ne dépasse pas ~67,000 JPY/mois (~400 EUR) — insuffisant pour vivre à Tokyo"
+    }
+  },
+
+  "visaComplexity": {
+    "score": 6,
+    "note": "Business Manager Visa devenu beaucoup plus strict depuis Oct 2025 : 30M JPY capital (~180k EUR) + 1 employé local + N2 japonais OBLIGATOIRE. Très restrictif.",
+    "startupVisa": {
+      "available": true,
+      "duration": "6 mois renouvelable jusqu'à 2 ans",
+      "note": "Moins exigeant que Business Manager Visa — pour tester"
+    },
+    "digitalNomadVisa_2024": {
+      "available": true,
+      "duration": "6 mois non renouvelable",
+      "incomeRequirement_annual_JPY": 10000000,
+      "note": "~65-70k EUR/an de revenus de source étrangère requis"
+    }
+  },
+
+  "costOfLiving_Tokyo_2026_JPY": {
+    "rent_1R_1K_central_monthly": 140000,
+    "rent_1LDK_central_monthly": 250000,
+    "rent_2LDK_central_monthly": 400000,
+    "rent_1R_periphery_monthly": 95000,
+    "groceries_single_monthly": 50000,
+    "restaurant_midrange_2pax": 8000,
+    "utilities_monthly_small_apt": 15000,
+    "internet_monthly": 5000,
+    "publicTransit_monthly": 15000,
+    "gym_monthly": 12000,
+    "note": "Tokyo reste étonnamment abordable sur alimentation/transport par rapport à Paris/Londres. Loyers centraux élevés mais moins que Manhattan."
+  },
+
+  "costOfLiving_Tokyo_2026_EUR_approx": {
+    "rent_1LDK_central_monthly": 1535,
+    "groceries_single_monthly": 307,
+    "utilities_monthly": 92,
+    "transit_monthly": 92
+  },
+
+  "infrastructureScore": {
+    "internet": 10,
+    "publicTransport": 10,
+    "safety": 10,
+    "healthcare": 9,
+    "coworking": 8,
+    "banking_foreigners": 4,
+    "note": "Banques japonaises très restrictives pour étrangers. Ouvrir compte = souvent 6+ mois et japonais basique requis."
+  }
+}

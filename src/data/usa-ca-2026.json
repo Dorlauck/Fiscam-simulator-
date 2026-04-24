@@ -1,0 +1,114 @@
+{
+  "meta": {
+    "country": "USA",
+    "city": "San Francisco / Los Angeles",
+    "state": "California",
+    "currency": "USD",
+    "fiscalYear": 2026,
+    "lastUpdated": "2026-04-24",
+    "sources": [
+      "California Franchise Tax Board",
+      "Tax Foundation 2026",
+      "Cal. Rev. & Tax. Code §§ 17001-18181"
+    ]
+  },
+
+  "federal_inheritsFrom": "usa-ny-2026.json#federal",
+
+  "ca_state": {
+    "incomeTaxBrackets_single_2026": [
+      { "min": 0,        "max": 10099,   "rate": 0.01 },
+      { "min": 10099,    "max": 23942,   "rate": 0.02 },
+      { "min": 23942,    "max": 37788,   "rate": 0.04 },
+      { "min": 37788,    "max": 52455,   "rate": 0.06 },
+      { "min": 52455,    "max": 66295,   "rate": 0.08 },
+      { "min": 66295,    "max": 338639,  "rate": 0.093 },
+      { "min": 338639,   "max": 406364,  "rate": 0.103 },
+      { "min": 406364,   "max": 677275,  "rate": 0.113 },
+      { "min": 677275,   "max": 1000000, "rate": 0.123 },
+      { "min": 1000000,  "max": null,    "rate": 0.133 }
+    ],
+    "mentalHealthTaxOver1M": 0.01,
+    "standardDeduction_single_2026": 5363,
+    "topMarginalRate_effective": 0.133,
+    "capitalGainsTreatment": "taxed as ordinary income — no preferential rate",
+    "note": "Taux marginal le plus élevé des USA (hors surtax 1% sur >$1M)"
+  },
+
+  "llc_specificTaxes": {
+    "annualFranchiseTax_USD": 800,
+    "firstYearExempt": true,
+    "firstYearExempt_endDate": "2026-12-31",
+    "llcGrossReceiptsFee": {
+      "under_250k": 0,
+      "250k_499k": 900,
+      "500k_999k": 2500,
+      "1M_4.99M": 6000,
+      "over_5M": 11790,
+      "note": "Basé sur le CA BRUT Californie, pas le net. Très punitif pour ecom/dropshipping"
+    }
+  },
+
+  "s_corp_specificTaxes": {
+    "entityLevelTax": 0.015,
+    "minimumFranchiseTax_USD": 800,
+    "note": "S-Corp CA paie 1.5% au niveau entité en plus de l'imposition perso des actionnaires — double imposition partielle unique aux USA"
+  },
+
+  "ptet": {
+    "available": true,
+    "rate": 0.093,
+    "note": "Pass-through entity tax — contournement du SALT cap fédéral pour high-earners"
+  },
+
+  "combinedMaxRate_single_2026": {
+    "federal_top": 0.37,
+    "ca_top": 0.133,
+    "combined_income_only": 0.503,
+    "plus_selfEmploymentTax": 0.029,
+    "effective_top_entrepreneur_CA": 0.532
+  },
+
+  "exitTax": {
+    "exists_state_level": true,
+    "reference": "CA AB 2088 (proposée) + rules sur source income",
+    "trigger": "Vente d'actifs CA-sourced (immobilier, entreprise CA) reste taxable même après déménagement",
+    "note": "Pas d'exit tax au sens strict (contrairement au fédéral), mais source rules agressives sur les actifs Californiens"
+  },
+
+  "salesTax": {
+    "stateRate": 0.0725,
+    "localRates": "+ 0% à +3% selon ville",
+    "combined_SF": 0.0875,
+    "combined_LA": 0.0975,
+    "note": "Plus élevé que la moyenne US"
+  },
+
+  "localTaxes_SF_specific": {
+    "grossReceiptsTax": {
+      "appliesToBusinessesOver": 2500000,
+      "rate": "0.16% à 1.008% selon activité"
+    },
+    "payrollExpenseTax": {
+      "appliesToBusinessesOver": 320000,
+      "rate": 0.0038
+    }
+  },
+
+  "healthcare": "inheritsFrom: usa-ny-2026.json#healthcare",
+  "socialSecurityPerception": "inheritsFrom: usa-ny-2026.json#socialSecurityPerception",
+
+  "visaComplexity": {
+    "score": 8,
+    "note": "Mêmes contraintes fédérales qu'NY. Attractivité tech via O-1 et H-1B (lottery)."
+  },
+
+  "costOfLiving_SF_specific": {
+    "rent_1br_center_USD_monthly": 3500,
+    "rent_2br_center_USD_monthly": 5200,
+    "groceries_single_USD_monthly": 600,
+    "transit_monthly_USD": 81,
+    "gasoline_USD_gallon": 5.80,
+    "note": "SF parmi les villes les plus chères au monde. LA ~15-20% moins cher que SF mais plus de transport."
+  }
+}
