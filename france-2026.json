@@ -1,0 +1,243 @@
+# CLAUDE.md — Instructions pour Claude Code
+
+> **Projet** : Tax Simulator pour entrepreneurs (SOLO / STARTUP / ECOM) comparant 7 juridictions
+> **Stack** : Next.js 15 + TypeScript + Tailwind + shadcn/ui + Vitest
+> **Date des specs** : avril 2026
+
+---
+
+## 🎯 Ta mission
+
+Construire un simulateur d'impôts et de pouvoir d'achat par pays pour entrepreneurs. Le produit compare 7 juridictions (Paris, NYC, Californie, Miami, Malte, Tokyo, Londres) sur 4 dimensions : fiscalité, coût de vie, qualité de vie, fiscalité de sortie.
+
+**Le point de différenciation philosophique du produit — à respecter impérativement** :
+
+> On classe objectivement chaque cotisation sociale en 3 catégories : `effectivelyValuable`, `nominallyValuable`, `pureCost`. Une cotisation retraite française qui n'a pas de chance d'être perçue en 2055 par la génération actuelle de 30-40 ans n'est PAS un avantage, c'est un prélèvement sec. Le simulateur doit assumer ce parti pris dans le code et dans l'UI.
+
+---
+
+## 📚 Ordre de lecture des fichiers
+
+Lis les fichiers **dans cet ordre exact** avant de commencer à coder :
+
+1. **`01_PRD.md`** — Vision, profils utilisateurs, contrats des types TS
+2. **`02_ARCHITECTURE.md`** — Structure du repo, signatures des fonctions, dépendances
+3. **`03_DATA_SCHEMA.md`** — Schema des JSON, convention de nommage, validation Zod
+4. **`04_ENGINE_ALGORITHM.md`** — Algorithmes du moteur fiscal (pseudocode TypeScript)
+5. **`05_UI_MOCKUP.md`** — Wireframes ASCII, composants à construire, palette
+6. **`06_SOURCES.md`** — Sources des données fiscales (pour défendre tes choix)
+7. **`07_EXAMPLES.md`** — **CRUCIAL** : cas de test à implémenter en premier dans Vitest
+
+Puis les **7 fichiers JSON** dans `/data/` :
+- `france-2026.json`
+- `usa-ny-2026.json`
+- `usa-ca-2026.json`
+- `usa-fl-2026.json`
+- `malta-2026.json`
+- `japan-2026.json`
+- `uk-2026.json`
+
+---
+
+## 🚀 Ordre d'implémentation recommandé
+
+### Phase 1 — Fondations (priorité MAX)
+
+```bash
+npx create-next-app@latest tax-simulator --typescript --tailwind --app --src-dir
+cd tax-simulator
+npx shadcn@latest init -d
+npm install recharts lucide-react zod class-variance-authority
+npm install -D vitest @testing-library/react happy-dom
+```
+
+1. **Crée le dossier `/src/data/`** et copie les 7 fichiers JSON dedans
+2. **Crée `/src/engine/types.ts`** à partir de `01_PRD.md` section 3-4
+3. **Crée `/src/engine/progressiveBrackets.ts`** (fonction utilitaire centrale)
+4. **Écris les tests Vitest AVANT le reste** — les cas de `07_EXAMPLES.md` deviennent tes assertions
+
+### Phase 2 — Moteur fiscal (une juridiction à la fois)
+
+Implémente **France en premier** car c'est la plus complexe (3 régimes : micro / EURL / SASU). Une fois que les tests France passent, les autres seront plus rapides.
+
+Ordre : France → USA-NY → USA-CA → USA-FL → UK → Malte → Japon
+
+**Règle d'or** : chaque fonction du moteur DOIT passer les cas de `07_EXAMPLES.md` avec tolérance ±1% sur les totaux avant de passer à la suivante.
+
+### Phase 3 — Cost of living + Scoring
+
+1. Module `src/costOfLiving/calculate.ts` : consomme les données `costOfLiving_*` des JSON
+2. Module `src/scoring/composite.ts` : calcule le score /100
+3. Module `src/scoring/prosCons.ts` : génère pros/cons objectifs
+
+### Phase 4 — UI
+
+1. Landing page minimaliste (voir `05_UI_MOCKUP.md` écran 1)
+2. Formulaire en 3 étapes (écran 2)
+3. Page de résultat comparé (écran 3) — c'est le cœur du produit
+
+Suis `05_UI_MOCKUP.md` scrupuleusement pour le layout. Utilise les composants shadcn/ui (`Card`, `Button`, `Select`, `Checkbox`, `Tabs`) et recharts pour les graphiques.
+
+### Phase 5 — Export PDF + i18n
+
+1. `@react-pdf/renderer` pour générer un PDF de la simulation
+2. i18n FR/EN simple via un objet typé dans `src/lib/i18n.ts` (pas besoin de `next-intl`)
+
+---
+
+## ⚠️ Règles strictes à respecter
+
+### 1. Pureté du moteur fiscal
+Aucune fonction de `/src/engine/` ne doit importer de React, Next, ou quoi que ce soit d'UI. Le moteur est **testable en pur Node**. Cette séparation est non-négociable.
+
+### 2. Devises
+Calculs internes dans la devise locale de la juridiction. Conversion en EUR **uniquement** à la dernière étape (pour l'affichage comparatif). Les taux de change sont dans `data/meta.json`.
+
+### 3. Classification des cotisations
+**Chaque** structure calculée doit retourner un objet `breakdown` avec :
+```typescript
+{
+  effectivelyValuable: number,  // santé réelle, bénéfices concrets
+  nominallyValuable: number,    // retraite/chômage selon pays
+  pureCost: number               // CSG/CRDS, Medicare avant 65, taxes pures
+}
+```
+
+### 4. Warning Malte / CFC rules
+Si l'utilisateur sélectionne Malte, **force** l'affichage d'un disclaimer avec 4 cases à cocher (voir `07_EXAMPLES.md` fin de doc). Sans ces 4 coches, ne pas afficher les résultats Malte.
+
+### 5. Banner staleness
+Ajoute un banner dans le Layout qui s'affiche si `Date.now() - meta.lastUpdated > 365 jours`. Voir `06_SOURCES.md`.
+
+### 6. Pas de backend
+Tout tourne côté client. Pas d'API, pas d'auth, pas de DB. Les données JSON sont importées statiquement. Déployable sur Vercel free tier.
+
+### 7. Dark mode par défaut
+Via `next-themes`. L'utilisateur peut basculer en light.
+
+### 8. Accessibilité
+- Tous les inputs ont des labels
+- Navigation clavier fonctionnelle
+- Contraste WCAG AA minimum
+
+---
+
+## 🧪 Tests Vitest — critère de succès
+
+**Tous les cas de `07_EXAMPLES.md` doivent passer avec tolérance ±1%.**
+
+Fichier cible : `tests/engine.*.test.ts`. Exemple :
+
+```typescript
+// tests/engine.france.test.ts
+import { describe, it, expect } from "vitest";
+import { calculateSASU } from "@/engine/structures/sasu-eurl";
+import franceData from "@/data/france-2026.json";
+
+describe("SASU Example 2A (CA 250k€)", () => {
+  const input = {
+    revenue: 250_000,
+    businessExpenses: 50_000,
+    salaryBrut: 60_000,
+    dividendTarget: 80_000,
+    familyStatus: "single" as const,
+    children: 0,
+  };
+  const result = calculateSASU(input, franceData);
+
+  it("total tax should be ~95,122 EUR (±1%)", () => {
+    expect(result.totalTax).toBeGreaterThan(94_170);
+    expect(result.totalTax).toBeLessThan(96_070);
+  });
+
+  it("net in hand should be ~95,878 EUR (±1%)", () => {
+    expect(result.netInHand).toBeGreaterThan(94_919);
+    expect(result.netInHand).toBeLessThan(96_837);
+  });
+
+  it("classification breakdown sums to social contributions", () => {
+    const { effectivelyValuable, nominallyValuable, pureCost } = result.socialContributionsBreakdown;
+    expect(effectivelyValuable + nominallyValuable + pureCost)
+      .toBeCloseTo(result.socialContributions, 0);
+  });
+});
+```
+
+---
+
+## 📝 Conventions de code
+
+- **TypeScript strict** : `"strict": true`, pas de `any` sauf cas exceptionnels documentés
+- **Nommage des fichiers** : kebab-case pour les non-composants (`progressive-brackets.ts`), PascalCase pour composants React (`ComparisonChart.tsx`)
+- **Imports absolus** : `@/engine/...` via tsconfig paths
+- **Commentaires** : en français, comme le reste du projet. Justifier les hypothèses fiscales qui ne sautent pas aux yeux
+- **Commits** : format conventionnel (`feat:`, `fix:`, `test:`, `docs:`)
+
+---
+
+## 🎨 Design system
+
+- **Police** : Inter (via `next/font`)
+- **Radius** : moyen (0.5rem) — pas arrondi façon "app de neobanque"
+- **Couleurs** (voir `05_UI_MOCKUP.md`) :
+  - Vert primary `#10b981` (net en poche)
+  - Jaune `#f59e0b` (nominal)
+  - Rouge `#ef4444` (pure cost)
+- **Densité** : tableau comparatif dense préférable à des cartes sur-aérées
+
+---
+
+## 🚨 Erreurs communes à éviter
+
+1. **Ne recalcule pas** des taux que tu n'as pas vérifiés dans les fichiers JSON ou `07_EXAMPLES.md`. Les barèmes 2026 ne sont pas dans ta knowledge base — tu dois consommer les JSON sans te fier à ta mémoire.
+
+2. **Ne traite pas** la Californie comme "USA générique". Chaque État US a ses spécificités (franchise tax, S-Corp entity tax, gross receipts). Idem NYC vs autres villes NY.
+
+3. **Ne mets pas** de logique fiscale dans les composants UI. Tout passe par le moteur.
+
+4. **Ne fais pas** de web scraping ou d'API externe. Les données sont statiques dans les JSON — on veut un produit déployable sur Vercel free tier sans runtime.
+
+5. **N'oublie pas** le cas où la micro-entreprise France est invalidée (CA > plafond) — le simulateur doit détecter ça et basculer automatiquement en SASU/EURL, PAS planter.
+
+6. **Ne mets pas** d'opinion politique. Le produit critique factuellement (ex: "Social Security Trust Fund projeté épuisé en 2034 — source officielle") mais ne dit pas "la France c'est l'enfer" ou autre. Reste analytique.
+
+7. **Ne suggère pas** d'actions fiscales illégales. Le Malta non-dom nécessite un vrai déménagement avec substance. Le simulateur doit le dire clairement.
+
+---
+
+## 📦 Deliverables attendus
+
+1. Repo GitHub avec code propre
+2. Tests Vitest passant à 100% (cas de `07_EXAMPLES.md`)
+3. Build Next.js clean (`npm run build` sans warning)
+4. Déploiement Vercel fonctionnel
+5. README avec instructions d'install + screenshots
+6. `CONTRIBUTING.md` pour que la communauté puisse mettre à jour les JSON chaque année
+
+---
+
+## 🆘 Si tu bloques
+
+- Les **sources officielles** des taux sont listées dans `06_SOURCES.md`. Si un chiffre te paraît bizarre, remonte à la source avant de modifier quoi que ce soit.
+- Les **exemples chiffrés** de `07_EXAMPLES.md` sont la vérité terrain. Si tes tests ne passent pas, c'est que ton implémentation est fausse, pas l'exemple.
+- **Ne refactore pas** les JSON sans raison. Leur structure est documentée dans `03_DATA_SCHEMA.md`.
+
+---
+
+## ✅ Definition of Done
+
+Le MVP est livré quand :
+
+- [ ] Les 3 profils (SOLO, STARTUP, ECOM) fonctionnent
+- [ ] Les 7 juridictions retournent un résultat cohérent
+- [ ] Tous les exemples de `07_EXAMPLES.md` passent en test (±1%)
+- [ ] La comparaison visuelle des 7 juridictions fonctionne (ComparisonChart)
+- [ ] Le PDF export produit un document lisible
+- [ ] Le dark mode fonctionne
+- [ ] Le warning Malte / CFC s'affiche
+- [ ] Le banner staleness fonctionne si date > 12 mois
+- [ ] i18n FR/EN minimal (au moins la landing + résultats)
+- [ ] Déployé sur Vercel
+- [ ] README complet
+
+Bon code. Si t'as des doutes sur la sémantique fiscale, relis `01_PRD.md` section 5 (Règles d'objectivité) — c'est l'âme du produit.

@@ -1,0 +1,209 @@
+{
+  "meta": {
+    "country": "Malta",
+    "city": "Valletta / Sliema / St. Julian's",
+    "currency": "EUR",
+    "fiscalYear": 2026,
+    "lastUpdated": "2026-04-24",
+    "sources": [
+      "Malta Tax & Customs Administration (mtca.gov.mt)",
+      "PwC Malta Tax Summaries 2026",
+      "Income Tax Act (Malta)",
+      "Residence Programme Rules 2014 amendments"
+    ]
+  },
+
+  "personalIncomeTaxBrackets_single_2026_EUR": [
+    { "min": 0,      "max": 12000,  "rate": 0.00 },
+    { "min": 12000,  "max": 16000,  "rate": 0.15 },
+    { "min": 16000,  "max": 60000,  "rate": 0.25 },
+    { "min": 60000,  "max": null,   "rate": 0.35 }
+  ],
+
+  "personalIncomeTaxBrackets_parent_2026_EUR": [
+    { "min": 0,      "max": 15000,  "rate": 0.00 },
+    { "min": 15000,  "max": 20000,  "rate": 0.15 },
+    { "min": 20000,  "max": 60000,  "rate": 0.25 },
+    { "min": 60000,  "max": null,   "rate": 0.35 }
+  ],
+
+  "nonDomRegime": {
+    "available": true,
+    "eligibility": "Tax resident in Malta (183+ days OR permanent home) BUT not domiciled (domicile of origin outside Malta)",
+    "taxationPrinciple": "Remittance basis",
+    "taxed": [
+      "Malta-source income (taxed at progressive rates)",
+      "Foreign income REMITTED to Malta (taxed at progressive rates)"
+    ],
+    "notTaxed": [
+      "Foreign income kept outside Malta (exempt entirely)",
+      "Foreign capital gains — even if remitted (exempt entirely)"
+    ],
+    "minimumTax": {
+      "amount_EUR": 5000,
+      "condition": "Foreign income > 35,000€/year (seul ou couple)",
+      "note": "Applicable depuis 2018. Même si aucun remittance en pratique."
+    },
+    "indefiniteDuration": true,
+    "note": "Contrairement au UK (limité dans le temps), Malte permet le non-dom indéfiniment tant que le domicile d'origine reste hors Malte"
+  },
+
+  "globalResidenceProgramme_GRP": {
+    "eligibility": "Non-EU/EEA/Swiss nationals",
+    "flatRateOnForeignRemittedIncome": 0.15,
+    "minimumAnnualTax_EUR": 15000,
+    "propertyRequirement": {
+      "purchase_minimum_EUR": 275000,
+      "purchase_minimum_Gozo_South_EUR": 220000,
+      "rent_minimum_annual_EUR": 9600,
+      "rent_minimum_Gozo_South_EUR": 8750
+    },
+    "administrativeFee_EUR": 6000,
+    "noStayRequirement": true
+  },
+
+  "residenceProgrammeRules_RPR": {
+    "eligibility": "EU/EEA/Swiss nationals",
+    "flatRateOnForeignRemittedIncome": 0.15,
+    "minimumAnnualTax_EUR": 15000,
+    "similarTo": "GRP but for EU residents"
+  },
+
+  "maltaPermanentResidenceProgram_MPRP": {
+    "eligibility": "Non-EU HNW investors",
+    "assetsRequired_EUR": 500000,
+    "financialAssets_minimum_EUR": 150000,
+    "propertyPurchase_minimum_EUR": 375000,
+    "propertyRent_minimum_annual_EUR": 14000,
+    "administrativeFee_EUR": 50000,
+    "additionalDependents_EUR": 10000,
+    "noDefinedTaxRate": true,
+    "note": "Permanent residence, pas juste fiscal. Dépend du domicile et structure pour fiscalité."
+  },
+
+  "corporate": {
+    "nominalRate": 0.35,
+    "refundSystem_6_7": {
+      "description": "Actionnaire non-résident reçoit un refund de 6/7 des taxes payées par la société sur les bénéfices de trading distribués",
+      "effectiveRate_trading": 0.05,
+      "refundMechanic": "Société paie 35% → distribue dividende → actionnaire reçoit refund = (6/7) × tax paid = 30% du profit. Net effectif : 35% - 30% = 5%",
+      "delayDays": "30 jours après distribution"
+    },
+    "refundSystem_5_7": {
+      "description": "Pour passive income (intérêts, royalties)",
+      "effectiveRate": 0.10
+    },
+    "refundSystem_2_3": {
+      "description": "Pour dividendes en provenance de l'étranger (double taxation relief)",
+      "effectiveRate": 0.1833
+    },
+    "finalTax15": {
+      "available_from": 2025,
+      "description": "Option alternative : taux final 15% sans refund (évite paperwork)",
+      "note": "Pratique si on ne veut pas du mécanisme refund"
+    },
+    "participationExemption": {
+      "available": true,
+      "note": "Dividendes et plus-values sur holdings qualifiés : exemption totale"
+    }
+  },
+
+  "holdingStructure_common": {
+    "description": "Pattern classique : Holding MT → OpCo MT. Le refund va à la Holding (pas à la personne physique). Évite l'imposition perso du refund dans le pays de résidence.",
+    "layers": [
+      "OpCo Malta (trading) — paie 35% IS",
+      "Holdco Malta — reçoit dividendes + refund 6/7",
+      "Holdco reçoit le refund exempté via participation exemption",
+      "Actionnaire personne physique prélève quand il veut, via structuration remittance"
+    ],
+    "costSetup_EUR": 8000,
+    "costAnnual_EUR": 6000
+  },
+
+  "dividends_toIndividual_nonDom": {
+    "fromMaltaCorp": 0,
+    "note": "Malte n'applique pas de withholding tax sur dividendes payés à non-résidents/non-doms"
+  },
+
+  "vat": {
+    "standardRate": 0.18,
+    "reducedRate_healthcare": 0.07,
+    "reducedRate_touristAccommodation": 0.07,
+    "note": "VAT parmi les plus basses de l'UE"
+  },
+
+  "exitTax": {
+    "exists": false,
+    "note": "Malte n'applique pas d'exit tax sur les personnes physiques. Gros avantage vs France/US."
+  },
+
+  "noTaxes": {
+    "wealthTax": true,
+    "inheritanceTax": true,
+    "giftTax": true,
+    "propertyTax_annual": true,
+    "note": "Malte = pas de wealth tax, pas de succession tax, pas de property tax annuelle"
+  },
+
+  "socialSecurityPerception": {
+    "retirement": {
+      "classification": "nominallyValuable",
+      "note": "Système public existe mais petit marché (population 500k). Les expatriés non-dom cotisent rarement."
+    },
+    "healthcare": {
+      "classification": "effectivelyValuable",
+      "note": "Système public NHS-like + assurance privée accessible et abordable",
+      "publicSystemQuality": 7,
+      "privateInsurance_monthly_EUR": 80
+    },
+    "unemployment": {
+      "note": "Non applicable pour entrepreneurs internationaux sous non-dom"
+    }
+  },
+
+  "visaComplexity": {
+    "score": 3,
+    "note": "EU/EEA : liberté totale. Non-EU : GRP ou MPRP. Temps de traitement ~4-6 mois.",
+    "englishSpeaking": true,
+    "schengenAccess": true
+  },
+
+  "practicalConsiderations": {
+    "languageEnglish": true,
+    "crsCommon": true,
+    "cfc_rules_riskForFrenchResidents": {
+      "level": "HIGH",
+      "warning": "Un résident fiscal français qui détient >10% d'une structure maltaise sera rattrapé par l'article 209 B du CGI (CFC rules). Il FAUT vraiment déménager pour que le schéma fonctionne."
+    },
+    "substanceRequirements": "Directeur résident local + bureau + activité réelle requise pour justifier résidence entreprise"
+  },
+
+  "costOfLiving_Valletta_Sliema_2026_EUR": {
+    "rent_1br_center": 1400,
+    "rent_2br_center": 2000,
+    "rent_1br_periphery": 950,
+    "groceries_single_monthly": 350,
+    "restaurant_midrange_2pax": 65,
+    "utilities_monthly": 120,
+    "internet_monthly": 35,
+    "transport_public_monthly": 30,
+    "gym_monthly": 55,
+    "healthInsurance_private_monthly": 80,
+    "carRental_monthly": 600,
+    "note": "Sensiblement moins cher que Paris ou Londres. Plus cher qu'il y a 5 ans (boom immobilier)."
+  },
+
+  "infrastructureScore": {
+    "internet": 7,
+    "coworking": 7,
+    "banking_offshore_accessibility": 6,
+    "publicTransport": 4,
+    "note": "Banques maltaises frileuses pour ouvrir comptes à non-résidents — passer par fintech (Revolut, Wise) ou banques internationales"
+  },
+
+  "weather": {
+    "sunshineHours_yearly": 3000,
+    "avgSummerTemp": 30,
+    "avgWinterTemp": 14
+  }
+}
