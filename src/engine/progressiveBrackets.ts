@@ -16,6 +16,22 @@ export function applyProgressiveBrackets(
   return tax;
 }
 
+/**
+ * Barème japonais : chaque tranche porte un rate ET une déduction cumulative.
+ * tax = revenu × rate(tranche applicable) - deduction(tranche applicable).
+ */
+export function applyJapaneseBracket(
+  taxableIncome: number,
+  brackets: Array<Bracket & { deduction: number }>
+): number {
+  if (taxableIncome <= 0) return 0;
+  const applicable = [...brackets]
+    .filter((b) => taxableIncome > b.min)
+    .pop();
+  if (!applicable) return 0;
+  return Math.max(0, taxableIncome * applicable.rate - applicable.deduction);
+}
+
 export function computeQuotientFamilialParts(
   status: "single" | "couple" | "couple_children",
   children: number
