@@ -1,0 +1,146 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import type { Jurisdiction, LifestyleInput, Profile, StructureResult } from "@/engine/types";
+import { calculateTax } from "@/engine/calculateTax";
+import { calculateCostOfLiving, type CostOfLivingResult } from "@/costOfLiving/calculate";
+import { getQualityOfLife, type QualityOfLife } from "@/scoring/qolIndex";
+import { buildVerdict, type VerdictSummary } from "@/scoring/composite";
+import { generateProsCons, type ProsCons } from "@/scoring/prosCons";
+
+export interface FormState {
+  profile: Profile;
+  grossAnnual: number;
+  businessExpenses: number;
+  familyStatus: "single" | "couple" | "couple_children";
+  children: number;
+  age: number;
+  lifestyle: LifestyleInput;
+  jurisdictions: Jurisdiction[];
+  maltaAcknowledged: boolean;
+}
+
+export interface JurisdictionResult {
+  jurisdiction: Jurisdiction;
+  result: StructureResult;
+  col: CostOfLivingResult;
+  qol: QualityOfLife;
+  verdict: VerdictSummary;
+  prosCons: ProsCons;
+  netAfterColAnnualEUR: number;
+  netAfterColMonthlyEUR: number;
+  netInHandEUR: number;
+}
+
+const DEFAULT_STATE: FormState = {
+  profile: "SOLO",
+  grossAnnual: 150_000,
+  businessExpenses: 10_000,
+  familyStatus: "single",
+  children: 0,
+  age: 35,
+  lifestyle: {
+    housingType: "t2",
+    location: "center",
+    carOwnership: false,
+    privateHealthcare: true,
+    diningOutFrequency: "medium",
+  },
+  jurisdictions: ["FR", "US_NY", "US_CA", "US_FL_MIAMI", "MT", "JP", "UK"],
+  maltaAcknowledged: false,
+};
+
+const EXCHANGE = { EUR_USD: 1.09, EUR_GBP: 0.83, EUR_JPY: 163 };
+
+function toEur(amount: number, jurisdiction: Jurisdiction): number {
+  if (jurisdiction === "US_NY" || jurisdiction === "US_CA" || jurisdiction === "US_FL_MIAMI")
+    return amount / EXCHANGE.EUR_USD;
+  if (jurisdiction === "UK") return amount / EXCHANGE.EUR_GBP;
+  if (jurisdiction === "JP") return amount / EXCHANGE.EUR_JPY;
+  return amount;
+}
+
+export function useSimulation() {
+  const [form, setForm] = useState<FormState>(DEFAULT_STATE);
+
+  const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
+    setForm((f) => ({ ...f, [key]: value }));
+
+  const updateLifestyle = <K extends keyof LifestyleInput>(key: K, value: LifestyleInput[K]) =>
+    setForm((f) => ({ ...f, lifestyle: { ...f.lifestyle, [key]: value } }));
+
+  const toggleJurisdiction = (j: Jurisdiction) =>
+    setForm((f) => ({
+      ...f,
+      jurisdictions: f.jurisdictions.includes(j)
+        ? f.jurisdictions.filter((x) => x !== j)
+        : [...f.jurisdictions, j],
+    }));
+
+  const results: JurisdictionResult[] = useMemo(() => {
+    // Filtre Malte si non acknowledged
+    const activeJurisdictions = form.jurisdictions.filter((j) =>
+      j === "MT" ? form.maltaAcknowledged : true
+    );
+
+    return activeJurisdictions
+      .map<JurisdictionResult>((j) => {
+        const result = calculateTax({
+          profile: form.profile,
+          revenue: {
+            grossAnnual: form.grossAnnual,
+            businessExpensesAnnual: form.businessExpenses,
+          },
+          personal: {
+            familyStatus: form.familyStatus,
+            children: form.children,
+            age: form.age,
+          },
+          jurisdiction: j,
+        });
+        const col = calculateCostOfLiving({
+          jurisdiction: j,
+          lifestyle: form.lifestyle,
+          age: form.age,
+        });
+        const qol = getQualityOfLife(j);
+
+        const netInHandEUR = toEur(result.netInHand, j);
+        const verdict = buildVerdict({
+          result,
+          col,
+          qol,
+          revenueGrossEUR: form.grossAnnual,
+          netInHandEUR,
+        });
+        const prosCons = generateProsCons({
+          result,
+          col,
+          qol,
+          revenueGrossEUR: form.grossAnnual,
+        });
+        const netAfterColAnnualEUR = netInHandEUR - col.totalAnnual;
+        return {
+          jurisdiction: j,
+          result,
+          col,
+          qol,
+          verdict,
+          prosCons,
+          netAfterColAnnualEUR,
+          netAfterColMonthlyEUR: netAfterColAnnualEUR / 12,
+          netInHandEUR,
+        };
+      })
+      .sort((a, b) => b.netAfterColMonthlyEUR - a.netAfterColMonthlyEUR);
+  }, [form]);
+
+  return {
+    form,
+    update,
+    updateLifestyle,
+    toggleJurisdiction,
+    results,
+    reset: () => setForm(DEFAULT_STATE),
+  };
+}
