@@ -58,6 +58,91 @@ describe("Exemple 1E — Malte non-dom, CA 100k€ remit 35k€", () => {
 });
 
 // =====================================================================
+// BUGFIX 2026-04 — Malta non-dom doit déduire les charges pro
+// Avant : CA 150k + 100k charges → traité comme si revenu dispo = 150k
+// Après : CA 150k - 100k charges = 50k profit → taxable si remitté
+// =====================================================================
+describe("Malta non-dom — déduction des charges pro (regression)", () => {
+  it("CA 150k avec 100k charges : profit net 50k, remittance capée au profit", () => {
+    const r = calculateMaltaNonDom(
+      {
+        foreignIncomeTotalEUR: 150_000,
+        businessExpensesEUR: 100_000,
+        remittanceToMaltaEUR: 50_000,
+        maltaSourceIncomeEUR: 0,
+        familyStatus: "single",
+        children: 0,
+      },
+      maltaData
+    );
+    // Flow attendu : revenue 150k, expenses 100k, netTakeHome ≈ 50k - IR(50k)
+    expect(r.flow.businessExpenses).toBe(100_000);
+    // IR sur remittance 50k : 0 jusqu'à 12k, 15% jusqu'à 16k (600), 25% au-delà (34k*25%=8500) → 9100
+    expectWithin(r.incomeTax, 9_100, 0.01);
+    // netTakeHome : profit 50k - 9100 = 40 900 €
+    expectWithin(r.flow.netTakeHome, 40_900, 0.01);
+  });
+
+  it("CA 100k sans charges (dividende holding offshore) : comportement inchangé (ex 1E)", () => {
+    const r = calculateMaltaNonDom(
+      {
+        foreignIncomeTotalEUR: 100_000,
+        businessExpensesEUR: 0,
+        remittanceToMaltaEUR: 35_000,
+        maltaSourceIncomeEUR: 0,
+        familyStatus: "single",
+        children: 0,
+      },
+      maltaData
+    );
+    // Rétro-compatibilité : exemple 1E continue de fonctionner
+    expectWithin(r.incomeTax, 5_350, 0.01);
+    expectWithin(r.flow.netTakeHome, 94_650, 0.01);
+  });
+
+  it("Remittance > profit net : warning + cap automatique", () => {
+    const r = calculateMaltaNonDom(
+      {
+        foreignIncomeTotalEUR: 100_000,
+        businessExpensesEUR: 70_000,
+        remittanceToMaltaEUR: 50_000, // > profit 30k : sera capée
+        maltaSourceIncomeEUR: 0,
+        familyStatus: "single",
+        children: 0,
+      },
+      maltaData
+    );
+    expect(r.warnings.some((w) => w.includes("supérieure au profit"))).toBe(true);
+    // Remittance actuelle = 30k, taxable = 30k
+    // IR : 0-12k=0, 12-16k=600, 16-30k=14k*25%=3500 → 4100
+    // Mais min non-dom foreign > 35k ? Non, foreign = 100k > 35k donc min 5k s'applique
+    expect(r.incomeTax).toBeGreaterThanOrEqual(5_000);
+    // netTakeHome = profit 30k - min(4100, 5000) = 25 000 (et non 95 000 comme avant le fix)
+    expectWithin(r.flow.netTakeHome, 25_000, 0.01);
+  });
+
+  it("Identité comptable Malte : revenue - businessExpenses = netTakeHome + totalLevied + retained", () => {
+    const r = calculateMaltaNonDom(
+      {
+        foreignIncomeTotalEUR: 200_000,
+        businessExpensesEUR: 80_000,
+        remittanceToMaltaEUR: 45_000,
+        maltaSourceIncomeEUR: 0,
+        familyStatus: "single",
+        children: 0,
+      },
+      maltaData
+    );
+    const f = r.flow;
+    const profit = f.revenue - f.businessExpenses;
+    const sum = f.netTakeHome + f.totalLevied + f.retainedAmount;
+    // Ce qu'il reste au non-dom = profit - IR. Le reste (offshore non remitté) est "accessible"
+    // mais pas encore consommé. Ici on a juste : netTakeHome + totalLevied doit ≈ profit.
+    expect(Math.abs(sum - profit) / profit).toBeLessThan(0.001);
+  });
+});
+
+// =====================================================================
 // Minimum tax non-dom — foreign income < 35k, pas de minimum imposé
 // =====================================================================
 describe("Malta non-dom — foreign income 20k (sous seuil), pas de minimum", () => {

@@ -160,12 +160,14 @@ export function calculateTax(input: SimulationInput): StructureResult {
     );
   }
 
-  // ---- Malte (non-dom simple : 35% du CA remit à Malte)
+  // ---- Malte (non-dom simple : remittance cible = min(profit net, 50k))
   if (jurisdiction === "MT") {
-    const remittance = Math.min(revenue.grossAnnual, 50_000);
+    const profit = Math.max(0, revenue.grossAnnual - revenue.businessExpensesAnnual);
+    const remittance = Math.min(profit, 50_000);
     return calculateMaltaNonDom(
       {
         foreignIncomeTotalEUR: revenue.grossAnnual,
+        businessExpensesEUR: revenue.businessExpensesAnnual,
         remittanceToMaltaEUR: remittance,
         maltaSourceIncomeEUR: 0,
         familyStatus: personal.familyStatus,

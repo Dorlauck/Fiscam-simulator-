@@ -55,6 +55,8 @@ function mkResult(j: Jurisdiction): JurisdictionResult {
     netAfterColAnnualEUR,
     netAfterColMonthlyEUR: netAfterColAnnualEUR / 12,
     netInHandEUR,
+    marginalNetPer1kEUR: 0,
+    marginalTaxRate: 0,
   };
 }
 
