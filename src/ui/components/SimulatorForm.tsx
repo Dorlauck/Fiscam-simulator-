@@ -3,6 +3,7 @@
 import type { FormState } from "@/ui/hooks/useSimulation";
 import type { Jurisdiction, LifestyleInput } from "@/engine/types";
 import { FLAG, LABEL } from "@/lib/formatters";
+import { useI18n } from "@/ui/hooks/useI18n";
 
 interface Props {
   step: 1 | 2 | 3;
@@ -15,25 +16,15 @@ interface Props {
   onSubmit: () => void;
 }
 
-const PROFILES: Array<{ id: FormState["profile"]; label: string; sub: string }> = [
-  { id: "SOLO", label: "SOLO", sub: "freelance / consultant" },
-  { id: "STARTUP", label: "STARTUP", sub: "fondateur SaaS / produit" },
-  { id: "ECOM", label: "ECOM", sub: "e-commerce / DTC" },
-];
-
-const HOUSING: Array<{ id: LifestyleInput["housingType"]; label: string }> = [
-  { id: "studio", label: "Studio" },
-  { id: "t2", label: "T2 / 1BR" },
-  { id: "t3", label: "T3 / 2BR" },
-  { id: "t4", label: "T4 / 3BR+" },
-];
-
-const DINING: Array<{ id: LifestyleInput["diningOutFrequency"]; label: string }> = [
-  { id: "low", label: "Rare" },
-  { id: "medium", label: "Moyen" },
-  { id: "high", label: "Fréquent" },
-];
-
+const PROFILES: Array<FormState["profile"]> = ["SOLO", "STARTUP", "ECOM"];
+const HOUSING: Array<LifestyleInput["housingType"]> = ["studio", "t2", "t3", "t4"];
+const HOUSING_LABEL: Record<LifestyleInput["housingType"], string> = {
+  studio: "Studio",
+  t2: "T2 / 1BR",
+  t3: "T3 / 2BR",
+  t4: "T4 / 3BR+",
+};
+const DINING: Array<LifestyleInput["diningOutFrequency"]> = ["low", "medium", "high"];
 const ALL_JURISDICTIONS: Jurisdiction[] = [
   "FR",
   "US_NY",
@@ -47,6 +38,18 @@ const ALL_JURISDICTIONS: Jurisdiction[] = [
 export function SimulatorForm(props: Props) {
   const { step, form, update, updateLifestyle, toggleJurisdiction, onNext, onBack, onSubmit } =
     props;
+  const { t } = useI18n();
+
+  const profileSub: Record<FormState["profile"], string> = {
+    SOLO: t("form.profile.solo"),
+    STARTUP: t("form.profile.startup"),
+    ECOM: t("form.profile.ecom"),
+  };
+  const diningLabel: Record<LifestyleInput["diningOutFrequency"], string> = {
+    low: t("form.dining.low"),
+    medium: t("form.dining.medium"),
+    high: t("form.dining.high"),
+  };
 
   return (
     <div className="container container--narrow">
@@ -60,26 +63,26 @@ export function SimulatorForm(props: Props) {
 
       {step === 1 && (
         <div className="card">
-          <h2>Étape 1/3 — Ton profil</h2>
-          <p className="text-muted">On ajuste les règles fiscales à ton activité.</p>
+          <h2>{t("form.step1.title")}</h2>
+          <p className="text-muted">{t("form.step1.subtitle")}</p>
 
-          <label className="mt-3">Profil d'entrepreneur</label>
+          <label className="mt-3">{t("form.profile.label")}</label>
           <div className="segmented">
             {PROFILES.map((p) => (
               <button
-                key={p.id}
-                data-active={form.profile === p.id}
-                onClick={() => update("profile", p.id)}
+                key={p}
+                data-active={form.profile === p}
+                onClick={() => update("profile", p)}
               >
-                <div>{p.label}</div>
-                <div style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>{p.sub}</div>
+                <div>{p}</div>
+                <div style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>{profileSub[p]}</div>
               </button>
             ))}
           </div>
 
           <div className="grid-2 mt-3">
             <div>
-              <label>CA annuel brut (€)</label>
+              <label>{t("form.revenue.label")}</label>
               <input
                 type="number"
                 value={form.grossAnnual}
@@ -89,7 +92,7 @@ export function SimulatorForm(props: Props) {
               />
             </div>
             <div>
-              <label>Charges pro annuelles (€)</label>
+              <label>{t("form.expenses.label")}</label>
               <input
                 type="number"
                 value={form.businessExpenses}
@@ -101,32 +104,32 @@ export function SimulatorForm(props: Props) {
           </div>
 
           <div className="mt-3">
-            <label>Situation familiale</label>
+            <label>{t("form.family.label")}</label>
             <div className="segmented">
               <button
                 data-active={form.familyStatus === "single"}
                 onClick={() => update("familyStatus", "single")}
               >
-                Seul(e)
+                {t("form.family.single")}
               </button>
               <button
                 data-active={form.familyStatus === "couple"}
                 onClick={() => update("familyStatus", "couple")}
               >
-                Couple
+                {t("form.family.couple")}
               </button>
               <button
                 data-active={form.familyStatus === "couple_children"}
                 onClick={() => update("familyStatus", "couple_children")}
               >
-                Couple + enfants
+                {t("form.family.couple_children")}
               </button>
             </div>
           </div>
 
           <div className="grid-2 mt-3">
             <div>
-              <label>Enfants</label>
+              <label>{t("form.children.label")}</label>
               <select
                 value={form.children}
                 onChange={(e) => update("children", Number(e.target.value))}
@@ -139,7 +142,7 @@ export function SimulatorForm(props: Props) {
               </select>
             </div>
             <div>
-              <label>Âge</label>
+              <label>{t("form.age.label")}</label>
               <input
                 type="number"
                 value={form.age}
@@ -152,7 +155,7 @@ export function SimulatorForm(props: Props) {
 
           <div className="row mt-4" style={{ justifyContent: "flex-end" }}>
             <button data-variant="primary" onClick={onNext}>
-              Suivant →
+              {t("form.next")}
             </button>
           </div>
         </div>
@@ -160,56 +163,54 @@ export function SimulatorForm(props: Props) {
 
       {step === 2 && (
         <div className="card">
-          <h2>Étape 2/3 — Ton mode de vie</h2>
-          <p className="text-muted">
-            Sert à calculer le coût de la vie réel dans chaque ville (panier standardisé).
-          </p>
+          <h2>{t("form.step2.title")}</h2>
+          <p className="text-muted">{t("form.step2.subtitle")}</p>
 
-          <label className="mt-3">Logement cible</label>
+          <label className="mt-3">{t("form.housing.label")}</label>
           <div className="segmented">
             {HOUSING.map((h) => (
               <button
-                key={h.id}
-                data-active={form.lifestyle.housingType === h.id}
-                onClick={() => updateLifestyle("housingType", h.id)}
+                key={h}
+                data-active={form.lifestyle.housingType === h}
+                onClick={() => updateLifestyle("housingType", h)}
               >
-                {h.label}
+                {HOUSING_LABEL[h]}
               </button>
             ))}
           </div>
 
           <div className="grid-2 mt-3">
             <div>
-              <label>Quartier</label>
+              <label>{t("form.location.label")}</label>
               <div className="segmented">
                 <button
                   data-active={form.lifestyle.location === "center"}
                   onClick={() => updateLifestyle("location", "center")}
                 >
-                  Centre
+                  {t("form.location.center")}
                 </button>
                 <button
                   data-active={form.lifestyle.location === "periphery"}
                   onClick={() => updateLifestyle("location", "periphery")}
                 >
-                  Périphérie
+                  {t("form.location.periphery")}
                 </button>
               </div>
             </div>
             <div>
-              <label>Voiture</label>
+              <label>{t("form.car.label")}</label>
               <div className="segmented">
                 <button
                   data-active={form.lifestyle.carOwnership === false}
                   onClick={() => updateLifestyle("carOwnership", false)}
                 >
-                  Non
+                  {t("form.no")}
                 </button>
                 <button
                   data-active={form.lifestyle.carOwnership === true}
                   onClick={() => updateLifestyle("carOwnership", true)}
                 >
-                  Oui
+                  {t("form.yes")}
                 </button>
               </div>
             </div>
@@ -217,35 +218,35 @@ export function SimulatorForm(props: Props) {
 
           <div className="grid-2 mt-3">
             <div>
-              <label>Assurance santé privée</label>
+              <label>{t("form.health.label")}</label>
               <div className="segmented">
                 <button
                   data-active={form.lifestyle.privateHealthcare === true}
                   onClick={() => updateLifestyle("privateHealthcare", true)}
                 >
-                  Oui
+                  {t("form.yes")}
                 </button>
                 <button
                   data-active={form.lifestyle.privateHealthcare === false}
                   onClick={() => updateLifestyle("privateHealthcare", false)}
                 >
-                  Non
+                  {t("form.no")}
                 </button>
               </div>
               <p className="text-dim" style={{ fontSize: "0.75rem", marginTop: "0.25rem" }}>
-                Forcée pour les juridictions US &lt; 65 ans.
+                {t("form.health.hint")}
               </p>
             </div>
             <div>
-              <label>Restos / sorties</label>
+              <label>{t("form.dining.label")}</label>
               <div className="segmented">
                 {DINING.map((d) => (
                   <button
-                    key={d.id}
-                    data-active={form.lifestyle.diningOutFrequency === d.id}
-                    onClick={() => updateLifestyle("diningOutFrequency", d.id)}
+                    key={d}
+                    data-active={form.lifestyle.diningOutFrequency === d}
+                    onClick={() => updateLifestyle("diningOutFrequency", d)}
                   >
-                    {d.label}
+                    {diningLabel[d]}
                   </button>
                 ))}
               </div>
@@ -254,10 +255,10 @@ export function SimulatorForm(props: Props) {
 
           <div className="row mt-4" style={{ justifyContent: "space-between" }}>
             <button data-variant="ghost" onClick={onBack}>
-              ← Retour
+              {t("form.back")}
             </button>
             <button data-variant="primary" onClick={onNext}>
-              Suivant →
+              {t("form.next")}
             </button>
           </div>
         </div>
@@ -265,8 +266,8 @@ export function SimulatorForm(props: Props) {
 
       {step === 3 && (
         <div className="card">
-          <h2>Étape 3/3 — Juridictions à comparer</h2>
-          <p className="text-muted">Coche au moins 2 juridictions pour lancer la comparaison.</p>
+          <h2>{t("form.step3.title")}</h2>
+          <p className="text-muted">{t("form.step3.subtitle")}</p>
 
           <div className="stack mt-3">
             {ALL_JURISDICTIONS.map((j) => {
@@ -288,35 +289,29 @@ export function SimulatorForm(props: Props) {
 
           {form.jurisdictions.includes("MT") && (
             <div className="banner mt-3">
-              <strong>⚠️ Avertissement Malte / CFC</strong>
-              <p style={{ margin: "0.5rem 0 0" }}>
-                Le régime non-dom n'est valide que si tu es réellement résident fiscal maltais
-                (&gt;183 j/an, substance économique, directeur local). Depuis la France, les
-                règles CFC (art. 209B CGI) s'appliquent. Coche ci-dessous pour confirmer.
-              </p>
+              <strong>{t("form.malta.warning.title")}</strong>
+              <p style={{ margin: "0.5rem 0 0" }}>{t("form.malta.warning.body")}</p>
               <label className="checkbox mt-2">
                 <input
                   type="checkbox"
                   checked={form.maltaAcknowledged}
                   onChange={(e) => update("maltaAcknowledged", e.target.checked)}
                 />
-                <span>
-                  Je comprends et je déménagerai physiquement à Malte avec substance réelle
-                </span>
+                <span>{t("form.malta.ack")}</span>
               </label>
             </div>
           )}
 
           <div className="row mt-4" style={{ justifyContent: "space-between" }}>
             <button data-variant="ghost" onClick={onBack}>
-              ← Retour
+              {t("form.back")}
             </button>
             <button
               data-variant="primary"
               onClick={onSubmit}
               disabled={form.jurisdictions.length < 2}
             >
-              Lancer la simulation →
+              {t("form.submit")}
             </button>
           </div>
         </div>

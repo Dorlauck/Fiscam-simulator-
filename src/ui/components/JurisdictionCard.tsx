@@ -2,6 +2,7 @@
 
 import type { JurisdictionResult } from "@/ui/hooks/useSimulation";
 import { FLAG, LABEL, formatEUR, formatPercent } from "@/lib/formatters";
+import { useI18n } from "@/ui/hooks/useI18n";
 
 interface Props {
   data: JurisdictionResult;
@@ -10,15 +11,15 @@ interface Props {
 }
 
 export function JurisdictionCard({ data, rank, onClick }: Props) {
+  const { t } = useI18n();
   const { result, col, verdict, netInHandEUR, netAfterColAnnualEUR } = data;
 
-  const exitBadge: Record<typeof verdict.exitTaxRisk, { label: string; variant: string }> = {
-    none: { label: "Exit tax : aucune", variant: "ok" },
-    low: { label: "Exit tax : faible", variant: "ok" },
-    moderate: { label: "Exit tax : modérée", variant: "warn" },
-    high: { label: "Exit tax : élevée", variant: "danger" },
-  };
-  const exit = exitBadge[verdict.exitTaxRisk];
+  const exitLabel = {
+    none: { key: "card.exitTax.none" as const, variant: "ok" },
+    low: { key: "card.exitTax.low" as const, variant: "ok" },
+    moderate: { key: "card.exitTax.moderate" as const, variant: "warn" },
+    high: { key: "card.exitTax.high" as const, variant: "danger" },
+  }[verdict.exitTaxRisk];
 
   return (
     <button
@@ -39,37 +40,39 @@ export function JurisdictionCard({ data, rank, onClick }: Props) {
           {LABEL[data.jurisdiction]}
           {rank === 0 ? <span style={{ marginLeft: "0.5rem" }}>🥇</span> : null}
         </div>
-        <div className="jcard-score">Score {verdict.score}/100</div>
+        <div className="jcard-score">
+          {t("card.score")} {verdict.score}/100
+        </div>
       </div>
       <div className="jcard-breakdown">
         <div className="jcard-row">
-          <span className="text-muted">Structure</span>
+          <span className="text-muted">{t("card.structure")}</span>
           <span style={{ fontSize: "0.8rem" }}>{result.structure}</span>
         </div>
         <div className="jcard-row">
-          <span className="text-muted">Impôts & cotis.</span>
+          <span className="text-muted">{t("card.taxesAndContrib")}</span>
           <span className="text-danger">-{formatEUR(result.totalTax)}</span>
         </div>
         <div className="jcard-row">
-          <span className="text-muted">Coût de vie / an</span>
+          <span className="text-muted">{t("card.colAnnual")}</span>
           <span className="text-danger">-{formatEUR(col.totalAnnual)}</span>
         </div>
         <div className="jcard-row">
-          <span className="text-muted">Net après impôts</span>
+          <span className="text-muted">{t("card.netAfterTax")}</span>
           <span>{formatEUR(netInHandEUR)}</span>
         </div>
         <div className="jcard-row" data-emphasis="total">
-          <span>Cashflow dispo / an</span>
+          <span>{t("card.cashflowAnnual")}</span>
           <span>{formatEUR(netAfterColAnnualEUR)}</span>
         </div>
         <div className="jcard-row">
-          <span className="text-muted">Taux effectif</span>
+          <span className="text-muted">{t("card.effectiveRate")}</span>
           <span>{formatPercent(result.effectiveRate, 1)}</span>
         </div>
       </div>
       <div className="row">
-        <span className="badge" data-variant={exit.variant}>
-          {exit.label}
+        <span className="badge" data-variant={exitLabel.variant}>
+          {t(exitLabel.key)}
         </span>
       </div>
     </button>

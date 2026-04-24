@@ -3,6 +3,7 @@
 import type { JurisdictionResult } from "@/ui/hooks/useSimulation";
 import { FLAG, LABEL, formatEUR, formatPercent } from "@/lib/formatters";
 import { BreakdownBar } from "./BreakdownBar";
+import { useI18n } from "@/ui/hooks/useI18n";
 
 interface Props {
   data: JurisdictionResult;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
+  const { t } = useI18n();
   const { result, col, netInHandEUR, prosCons } = data;
   const b = result.socialContributionsBreakdown;
 
@@ -29,17 +31,17 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
     <div className="card">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <h2>
-          {FLAG[data.jurisdiction]} {LABEL[data.jurisdiction]} — détail fiscal
+          {FLAG[data.jurisdiction]} {LABEL[data.jurisdiction]} — {t("detail.title")}
         </h2>
-        <button data-variant="ghost" onClick={onClose} aria-label="Fermer le détail">
-          ✕ Fermer
+        <button data-variant="ghost" onClick={onClose} aria-label={t("detail.close")}>
+          {t("detail.close")}
         </button>
       </div>
       <p className="text-muted" style={{ fontSize: "0.9rem" }}>
-        Structure : <strong>{result.structure}</strong>
+        {t("card.structure")} : <strong>{result.structure}</strong>
       </p>
 
-      <h3 className="mt-4">Décomposition du revenu brut</h3>
+      <h3 className="mt-4">{t("detail.breakdown.title")}</h3>
       <BreakdownBar
         netInHand={netInHandEUR}
         effectivelyValuable={b.effectivelyValuable}
@@ -47,15 +49,17 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
         pureCost={b.pureCost}
       />
 
-      <h3 className="mt-4">Impôts & cotisations sur {formatEUR(revenueGrossEUR)} de CA</h3>
+      <h3 className="mt-4">
+        {t("detail.taxes.title")} · {formatEUR(revenueGrossEUR)}
+      </h3>
       <table className="detail-table">
         <tbody>
-          {result.corporateTax > 0 && line("Impôt société (IS)", result.corporateTax)}
+          {result.corporateTax > 0 && line(t("detail.row.corpTax"), result.corporateTax)}
           {result.socialContributions > 0 &&
-            line("Cotisations sociales", result.socialContributions)}
+            line(t("detail.row.socialContrib"), result.socialContributions)}
           {b.effectivelyValuable > 0 && (
             <tr className="text-muted">
-              <td style={{ paddingLeft: "1rem" }}>✓ Effectivement perçues</td>
+              <td style={{ paddingLeft: "1rem" }}>{t("detail.row.effectivelyValuable")}</td>
               <td className="num">{formatEUR(b.effectivelyValuable)}</td>
               <td className="pct">
                 {formatPercent(b.effectivelyValuable / Math.max(1, revenueGrossEUR), 0)}
@@ -64,7 +68,7 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
           )}
           {b.nominallyValuable > 0 && (
             <tr className="text-warning">
-              <td style={{ paddingLeft: "1rem" }}>⚠ Nominalement valables</td>
+              <td style={{ paddingLeft: "1rem" }}>{t("detail.row.nominallyValuable")}</td>
               <td className="num">{formatEUR(b.nominallyValuable)}</td>
               <td className="pct">
                 {formatPercent(b.nominallyValuable / Math.max(1, revenueGrossEUR), 0)}
@@ -73,42 +77,42 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
           )}
           {b.pureCost > 0 && (
             <tr className="text-danger">
-              <td style={{ paddingLeft: "1rem" }}>✗ Pure cost / dead weight</td>
+              <td style={{ paddingLeft: "1rem" }}>{t("detail.row.pureCost")}</td>
               <td className="num">{formatEUR(b.pureCost)}</td>
               <td className="pct">
                 {formatPercent(b.pureCost / Math.max(1, revenueGrossEUR), 0)}
               </td>
             </tr>
           )}
-          {result.dividendTax > 0 && line("Flat tax dividendes", result.dividendTax)}
-          {result.incomeTax > 0 && line("Impôt sur le revenu", result.incomeTax)}
-          {result.otherTaxes > 0 && line("Autres (franchise, MCTMT, etc.)", result.otherTaxes)}
+          {result.dividendTax > 0 && line(t("detail.row.divTax"), result.dividendTax)}
+          {result.incomeTax > 0 && line(t("detail.row.incomeTax"), result.incomeTax)}
+          {result.otherTaxes > 0 && line(t("detail.row.other"), result.otherTaxes)}
           <tr className="total">
-            <td>TOTAL PRÉLEVÉ</td>
+            <td>{t("detail.row.totalLevied")}</td>
             <td className="num">{formatEUR(result.totalTax)}</td>
             <td className="pct">{formatPercent(result.effectiveRate, 0)}</td>
           </tr>
           <tr>
-            <td>Net en poche (après impôts)</td>
+            <td>{t("detail.row.netAfterTax")}</td>
             <td className="num text-primary">{formatEUR(netInHandEUR)}</td>
             <td className="pct">
               {formatPercent(netInHandEUR / Math.max(1, revenueGrossEUR), 0)}
             </td>
           </tr>
           <tr>
-            <td>Coût de vie standardisé / an</td>
+            <td>{t("detail.row.colAnnual")}</td>
             <td className="num text-danger">-{formatEUR(col.totalAnnual)}</td>
             <td className="pct">—</td>
           </tr>
           <tr className="total">
-            <td>CASHFLOW DISPONIBLE / AN</td>
+            <td>{t("detail.row.cashflowAnnual")}</td>
             <td className="num">{formatEUR(netInHandEUR - col.totalAnnual)}</td>
             <td className="pct">
               {formatPercent((netInHandEUR - col.totalAnnual) / Math.max(1, revenueGrossEUR), 0)}
             </td>
           </tr>
           <tr>
-            <td>Cashflow disponible / mois</td>
+            <td>{t("detail.row.cashflowMonthly")}</td>
             <td className="num text-primary" style={{ fontSize: "1.05rem", fontWeight: 700 }}>
               {formatEUR((netInHandEUR - col.totalAnnual) / 12)}
             </td>
@@ -117,17 +121,17 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
         </tbody>
       </table>
 
-      <h3 className="mt-4">Coût de vie détaillé (mensuel EUR)</h3>
+      <h3 className="mt-4">{t("detail.col.title")}</h3>
       <table className="detail-table">
         <tbody>
           {[
-            ["Loyer", col.rent],
-            ["Alimentation (courses)", col.food],
-            ["Restaurant (dining out)", col.diningOut],
-            ["Transport", col.transport],
-            ["Santé (privée)", col.healthcare],
-            ["Utilities + internet", col.utilities],
-            ["Gym", col.gym],
+            [t("detail.col.rent"), col.rent],
+            [t("detail.col.food"), col.food],
+            [t("detail.col.dining"), col.diningOut],
+            [t("detail.col.transport"), col.transport],
+            [t("detail.col.healthcare"), col.healthcare],
+            [t("detail.col.utilities"), col.utilities],
+            [t("detail.col.gym"), col.gym],
           ].map(([l, v]) => (
             <tr key={l as string}>
               <td>{l}</td>
@@ -136,21 +140,21 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
             </tr>
           ))}
           <tr className="total">
-            <td>TOTAL / MOIS</td>
+            <td>{t("detail.col.totalMonth")}</td>
             <td className="num">{formatEUR(col.totalMonthly)}</td>
             <td />
           </tr>
         </tbody>
       </table>
 
-      <h3 className="mt-4">Points positifs & négatifs (objectifs)</h3>
+      <h3 className="mt-4">{t("detail.prosCons.title")}</h3>
       <div className="pros-cons">
         <div>
           <strong className="text-primary">✅ Pros</strong>
           <ul>
             {prosCons.pros.length === 0 ? (
               <li className="text-dim" style={{ paddingLeft: 0 }}>
-                Rien de particulier à signaler.
+                {t("detail.pros.empty")}
               </li>
             ) : (
               prosCons.pros.map((p, i) => (
@@ -166,7 +170,7 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
           <ul>
             {prosCons.cons.length === 0 ? (
               <li className="text-dim" style={{ paddingLeft: 0 }}>
-                Rien à signaler côté négatif.
+                {t("detail.cons.empty")}
               </li>
             ) : (
               prosCons.cons.map((c, i) => (

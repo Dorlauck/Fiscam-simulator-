@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useSimulation } from "@/ui/hooks/useSimulation";
+import { useI18n } from "@/ui/hooks/useI18n";
 import { SimulatorForm } from "@/ui/components/SimulatorForm";
 import { ComparisonChart } from "@/ui/components/ComparisonChart";
 import { JurisdictionCard } from "@/ui/components/JurisdictionCard";
 import { DetailPanel } from "@/ui/components/DetailPanel";
+import { ExportPdfButton } from "@/ui/components/ExportPdfButton";
 import type { Jurisdiction } from "@/engine/types";
 import { formatEUR } from "@/lib/formatters";
 
@@ -16,55 +18,54 @@ export default function Page() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction | null>(null);
   const sim = useSimulation();
+  const { t } = useI18n();
 
-  // ---- Écran 1 : landing
   if (view === "landing") {
     return (
       <div>
         <section className="container hero">
-          <span className="kicker">Avril 2026 · Données officielles</span>
-          <h1>L'impôt réel, pas celui qu'on t'a promis.</h1>
-          <p className="lede">
-            Compare ce qu'il te reste vraiment, dans 7 pays, pour ton profil d'entrepreneur —
-            après impôts, cotisations, loyer et bouffe.
-          </p>
+          <span className="kicker">{t("landing.kicker")}</span>
+          <h1>{t("landing.hero.title")}</h1>
+          <p className="lede">{t("landing.hero.lede")}</p>
           <button data-variant="primary" onClick={() => setView("form")}>
-            Commencer la simulation →
+            {t("landing.cta.start")}
           </button>
           <p className="text-dim mt-3" style={{ fontSize: "0.85rem" }}>
-            On ne te vend rien. Pas d'email. Pas de tracking. Open source.
+            {t("landing.promise.noTracking")}
           </p>
         </section>
 
         <section className="container" style={{ paddingTop: 0 }}>
           <div className="card">
-            <h2>Ce qu'on fait différemment</h2>
+            <h2>{t("landing.principles.title")}</h2>
             <div className="stack mt-3">
               <div>
-                <strong className="text-primary">
-                  ✓ Distingue les cotisations réellement utiles des cotisations nominales.
-                </strong>
-                <p className="text-muted mt-1">
-                  Une cotisation retraite qui n'a pas de chance d'être perçue en 2055 pour la
-                  génération 30-40 ans n'est pas un avantage, c'est un prélèvement sec. On classe
-                  chaque cotisation en <strong className="text-primary">effectivement perçue</strong>,{" "}
-                  <strong className="text-warning">nominalement valable</strong>, ou{" "}
-                  <strong className="text-danger">pure charge</strong>.
-                </p>
+                <strong className="text-primary">{t("landing.principle1.title")}</strong>
+                <p
+                  className="text-muted mt-1"
+                  dangerouslySetInnerHTML={{
+                    __html: t("landing.principle1.body").replace(
+                      /\*\*(.+?)\*\*/g,
+                      "<strong>$1</strong>"
+                    ),
+                  }}
+                />
               </div>
               <div>
-                <strong className="text-primary">✓ Intègre le coût réel de vivre dans chaque ville.</strong>
-                <p className="text-muted mt-1">
-                  5000 €/mois à Paris ≠ 5000 €/mois à Miami. Le bon indicateur c'est{" "}
-                  <em>cashflow disponible après coût de vie standardisé</em>.
-                </p>
+                <strong className="text-primary">{t("landing.principle2.title")}</strong>
+                <p
+                  className="text-muted mt-1"
+                  dangerouslySetInnerHTML={{
+                    __html: t("landing.principle2.body").replace(
+                      /\*(.+?)\*/g,
+                      "<em>$1</em>"
+                    ),
+                  }}
+                />
               </div>
               <div>
-                <strong className="text-primary">✓ Affiche l'exit tax et les pièges de sortie.</strong>
-                <p className="text-muted mt-1">
-                  "Low tax now" peut coûter cher plus tard — exit tax France, IRC 877A US,
-                  Temporary Non-Residence Rule UK.
-                </p>
+                <strong className="text-primary">{t("landing.principle3.title")}</strong>
+                <p className="text-muted mt-1">{t("landing.principle3.body")}</p>
               </div>
             </div>
           </div>
@@ -73,7 +74,6 @@ export default function Page() {
     );
   }
 
-  // ---- Écran 2 : formulaire
   if (view === "form") {
     return (
       <SimulatorForm
@@ -89,26 +89,28 @@ export default function Page() {
     );
   }
 
-  // ---- Écran 3 : résultats
   const detail = selectedJurisdiction
     ? sim.results.find((r) => r.jurisdiction === selectedJurisdiction) ?? null
     : null;
 
+  const familyLabel =
+    sim.form.familyStatus === "single"
+      ? t("form.family.single")
+      : sim.form.familyStatus === "couple"
+        ? t("form.family.couple")
+        : t("form.family.couple_children");
+
   return (
     <div className="container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <div className="text-muted" style={{ fontSize: "0.9rem" }}>
-            {sim.form.profile} · CA {formatEUR(sim.form.grossAnnual)} ·{" "}
-            {sim.form.familyStatus === "single"
-              ? "Célibataire"
-              : sim.form.familyStatus === "couple"
-                ? "Couple"
-                : `Couple + ${sim.form.children} enfant(s)`}
+            {sim.form.profile} · {formatEUR(sim.form.grossAnnual)} · {familyLabel}
           </div>
-          <h1>Comparaison des {sim.results.length} juridictions</h1>
+          <h1>{t("results.title", { n: sim.results.length })}</h1>
         </div>
         <div className="row">
+          <ExportPdfButton results={sim.results} form={sim.form} />
           <button
             data-variant="ghost"
             onClick={() => {
@@ -117,17 +119,14 @@ export default function Page() {
               setSelectedJurisdiction(null);
             }}
           >
-            ← Modifier
+            {t("results.edit")}
           </button>
         </div>
       </div>
 
       {sim.results.length === 0 ? (
         <div className="card mt-3">
-          <p className="text-muted">
-            Aucune juridiction active. Retourne à l'étape 3 et coche au moins une juridiction.
-            Rappel : Malte nécessite une confirmation explicite.
-          </p>
+          <p className="text-muted">{t("results.empty")}</p>
         </div>
       ) : (
         <>
@@ -135,9 +134,9 @@ export default function Page() {
             <ComparisonChart results={sim.results} onSelect={setSelectedJurisdiction} />
           </div>
 
-          <h2 className="mt-4">Fiches juridictions</h2>
+          <h2 className="mt-4">{t("results.cards.title")}</h2>
           <p className="text-muted" style={{ fontSize: "0.9rem" }}>
-            Clique sur une fiche pour voir la décomposition complète.
+            {t("results.cards.hint")}
           </p>
           <div className="grid-3 mt-3">
             {sim.results.map((r, i) => (

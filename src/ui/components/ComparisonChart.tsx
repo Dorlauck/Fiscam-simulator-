@@ -2,6 +2,7 @@
 
 import type { JurisdictionResult } from "@/ui/hooks/useSimulation";
 import { FLAG, LABEL, formatEUR } from "@/lib/formatters";
+import { useI18n } from "@/ui/hooks/useI18n";
 
 interface Props {
   results: JurisdictionResult[];
@@ -9,13 +10,8 @@ interface Props {
 }
 
 export function ComparisonChart({ results, onSelect }: Props) {
-  if (results.length === 0) {
-    return (
-      <div className="card">
-        <p className="text-muted">Aucune juridiction sélectionnée.</p>
-      </div>
-    );
-  }
+  const { t } = useI18n();
+  if (results.length === 0) return null;
   const positive = results.filter((r) => r.netAfterColMonthlyEUR > 0);
   const max = Math.max(...positive.map((r) => r.netAfterColMonthlyEUR), 1);
 
@@ -29,10 +25,9 @@ export function ComparisonChart({ results, onSelect }: Props) {
 
   return (
     <div className="card">
-      <h3>Cashflow réel mensuel — après impôts, cotisations, et coût de la vie</h3>
+      <h3>{t("results.chart.title")}</h3>
       <p className="text-muted" style={{ fontSize: "0.85rem", marginTop: 0 }}>
-        Panier standardisé : logement + alimentation + transport + santé + utilities. Triés par
-        cashflow disponible.
+        {t("results.chart.subtitle")}
       </p>
       <div className="mt-3">
         {results.map((r, i) => {
