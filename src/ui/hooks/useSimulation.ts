@@ -38,6 +38,10 @@ export interface JurisdictionResult {
   netAfterColAnnualEUR: number;
   netAfterColMonthlyEUR: number;
   netInHandEUR: number;
+  /** Net marginal gardé pour +1 000 € de CA supplémentaire (EUR). */
+  marginalNetPer1kEUR: number;
+  /** Taux marginal effectif (1 - marginalNet/1000) en % */
+  marginalTaxRate: number;
 }
 
 const DEFAULT_STATE: FormState = {
@@ -95,7 +99,7 @@ export function useSimulation() {
 
     return activeJurisdictions
       .map<JurisdictionResult>((j) => {
-        const result = calculateTax({
+        const baseInput = {
           profile: form.profile,
           revenue: {
             grossAnnual: form.grossAnnual,
@@ -110,8 +114,34 @@ export function useSimulation() {
             children: form.children,
             age: form.age,
           },
+        };
+        const result = calculateTax({ ...baseInput, jurisdiction: j });
+        // Calcul marginal : +1 000 € de CA, quel est le net gardé SI on distribue tout ?
+        // Pour refléter le vrai coût fiscal d'un euro supplémentaire, on assume que le
+        // dirigeant veut sortir le surplus (dividende illimité) — sinon le surplus reste
+        // en société et le marginal apparaît à 0 ce qui est trompeur.
+        const marginalCompensation = {
+          salaryBrutAnnual: form.salaryBrutAnnual,
+          // On force une cible dividende très haute pour que le moteur distribue tout
+          // le profit disponible. Le résultat reflète le marginal fiscal réel.
+          dividendNetTarget: Math.max(form.grossAnnual * 2, 1_000_000),
+        };
+        const resultBase = calculateTax({
+          ...baseInput,
+          compensation: marginalCompensation,
           jurisdiction: j,
         });
+        const resultPlus1k = calculateTax({
+          ...baseInput,
+          compensation: marginalCompensation,
+          revenue: { ...baseInput.revenue, grossAnnual: form.grossAnnual + 1_000 },
+          jurisdiction: j,
+        });
+        const flowBase = flowToEUR(result.flow);
+        const flowMarginBase = flowToEUR(resultBase.flow);
+        const flowMarginPlus = flowToEUR(resultPlus1k.flow);
+        const marginalNetPer1kEUR = flowMarginPlus.netTakeHome - flowMarginBase.netTakeHome;
+        const marginalTaxRate = 1 - marginalNetPer1kEUR / 1000;
         const col = calculateCostOfLiving({
           jurisdiction: j,
           lifestyle: form.lifestyle,
@@ -120,7 +150,7 @@ export function useSimulation() {
         const qol = getQualityOfLife(j);
 
         // Conversion EN MASSE du flow en EUR — plus aucune valeur locale ne fuit vers l'UI
-        const flowEUR = flowToEUR(result.flow);
+        const flowEUR = flowBase;
         const netInHandEUR = flowEUR.netTakeHome;
         const verdict = buildVerdict({
           result,
@@ -147,6 +177,8 @@ export function useSimulation() {
           netAfterColAnnualEUR,
           netAfterColMonthlyEUR: netAfterColAnnualEUR / 12,
           netInHandEUR,
+          marginalNetPer1kEUR,
+          marginalTaxRate,
         };
       })
       .sort((a, b) => b.netAfterColMonthlyEUR - a.netAfterColMonthlyEUR);

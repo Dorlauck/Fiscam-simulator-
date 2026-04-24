@@ -286,6 +286,14 @@ const STRINGS = {
   "card.netAfterTax": { fr: "Net après impôts", en: "Net after tax" },
   "card.cashflowAnnual": { fr: "Cashflow dispo / an", en: "Available cashflow / yr" },
   "card.effectiveRate": { fr: "Taux effectif", en: "Effective rate" },
+  "card.marginal": {
+    fr: "+1 000 € de CA → tu gardes",
+    en: "+€1,000 revenue → you keep",
+  },
+  "card.marginalRate": {
+    fr: "Taux marginal",
+    en: "Marginal rate",
+  },
   "card.score": { fr: "Score", en: "Score" },
   "card.exitTax.none": { fr: "Exit tax : aucune", en: "Exit tax: none" },
   "card.exitTax.low": { fr: "Exit tax : faible", en: "Exit tax: low" },

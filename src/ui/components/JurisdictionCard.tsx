@@ -80,6 +80,12 @@ export function JurisdictionCard({ data, rank, onClick }: Props) {
           <span className="text-muted">{t("card.effectiveRate")}</span>
           <span>{formatPercent(effectiveRateEUR, 1)}</span>
         </div>
+        <div className="jcard-row" title={`${t("card.marginalRate")} : ${formatPercent(data.marginalTaxRate, 0)}`}>
+          <span className="text-muted">{t("card.marginal")}</span>
+          <span className="text-primary" style={{ fontWeight: 600 }}>
+            {formatEUR(data.marginalNetPer1kEUR)}
+          </span>
+        </div>
       </div>
 
       <div className="row" style={{ gap: "6px" }}>

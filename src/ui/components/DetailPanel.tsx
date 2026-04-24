@@ -58,7 +58,7 @@ export function DetailPanel({ data, revenueGrossEUR, onClose }: Props) {
         )}
       </p>
       <div className="mt-3">
-        <TaxFlowWaterfall flow={flowEUR} />
+        <TaxFlowWaterfall flow={flowEUR} jurisdiction={data.jurisdiction} />
       </div>
 
       {/* SECTION 2 — Classification objective des cotisations */}
