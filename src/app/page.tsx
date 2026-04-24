@@ -8,6 +8,8 @@ import { ComparisonChart } from "@/ui/components/ComparisonChart";
 import { JurisdictionCard } from "@/ui/components/JurisdictionCard";
 import { DetailPanel } from "@/ui/components/DetailPanel";
 import { ExportPdfButton } from "@/ui/components/ExportPdfButton";
+import { SalaryVsDividend } from "@/ui/components/SalaryVsDividend";
+import { ResultsHero } from "@/ui/components/ResultsHero";
 import type { Jurisdiction } from "@/engine/types";
 import { formatEUR } from "@/lib/formatters";
 
@@ -18,7 +20,8 @@ export default function Page() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction | null>(null);
   const sim = useSimulation();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const L = (fr: string, en: string) => (locale === "en" ? en : fr);
 
   if (view === "landing") {
     return (
@@ -56,10 +59,7 @@ export default function Page() {
                 <p
                   className="text-muted mt-1"
                   dangerouslySetInnerHTML={{
-                    __html: t("landing.principle2.body").replace(
-                      /\*(.+?)\*/g,
-                      "<em>$1</em>"
-                    ),
+                    __html: t("landing.principle2.body").replace(/\*(.+?)\*/g, "<em>$1</em>"),
                   }}
                 />
               </div>
@@ -100,14 +100,16 @@ export default function Page() {
         ? t("form.family.couple")
         : t("form.family.couple_children");
 
+  const frResult = sim.results.find((r) => r.jurisdiction === "FR");
+
   return (
     <div className="container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "24px" }}>
         <div>
-          <div className="text-muted" style={{ fontSize: "0.9rem" }}>
+          <div className="text-muted" style={{ fontSize: "0.85rem", marginBottom: "4px" }}>
             {sim.form.profile} · {formatEUR(sim.form.grossAnnual)} · {familyLabel}
           </div>
-          <h1>{t("results.title", { n: sim.results.length })}</h1>
+          <h1 style={{ fontSize: "1.8rem" }}>{t("results.title", { n: sim.results.length })}</h1>
         </div>
         <div className="row">
           <ExportPdfButton results={sim.results} form={sim.form} />
@@ -125,17 +127,22 @@ export default function Page() {
       </div>
 
       {sim.results.length === 0 ? (
-        <div className="card mt-3">
+        <div className="card">
           <p className="text-muted">{t("results.empty")}</p>
         </div>
       ) : (
         <>
-          <div className="mt-3">
+          {/* ---- Hero : le chiffre clé en grand ---- */}
+          <ResultsHero topResult={sim.results[0]} revenueGrossEUR={sim.form.grossAnnual} />
+
+          {/* ---- Chart comparatif ---- */}
+          <div className="mt-5">
             <ComparisonChart results={sim.results} onSelect={setSelectedJurisdiction} />
           </div>
 
-          <h2 className="mt-4">{t("results.cards.title")}</h2>
-          <p className="text-muted" style={{ fontSize: "0.9rem" }}>
+          {/* ---- Grille des cartes juridictions ---- */}
+          <h2 className="mt-6">{t("results.cards.title")}</h2>
+          <p className="text-muted" style={{ fontSize: "0.9rem", marginTop: "4px" }}>
             {t("results.cards.hint")}
           </p>
           <div className="grid-3 mt-3">
@@ -149,8 +156,19 @@ export default function Page() {
             ))}
           </div>
 
+          {/* ---- Salary vs Dividend (affiché si FR est dans les résultats) ---- */}
+          {frResult && (
+            <div className="mt-6">
+              <SalaryVsDividend
+                currentSalaryGross={sim.form.salaryBrutAnnual}
+                profitBeforeIS={frResult.flowEUR.profitBeforeCorpTax}
+              />
+            </div>
+          )}
+
+          {/* ---- Détail juridiction sélectionnée ---- */}
           {detail && (
-            <div className="mt-4">
+            <div className="mt-6">
               <DetailPanel
                 data={detail}
                 revenueGrossEUR={sim.form.grossAnnual}
@@ -158,6 +176,19 @@ export default function Page() {
               />
             </div>
           )}
+
+          {/* ---- Footer pédagogique ---- */}
+          <div className="card mt-6" style={{ background: "var(--bg-inset)" }}>
+            <h4 style={{ marginBottom: "8px" }}>
+              {L("Comment lire ces résultats ?", "How to read these results?")}
+            </h4>
+            <p className="text-muted" style={{ fontSize: "0.88rem", lineHeight: 1.6 }}>
+              {L(
+                "Le cashflow mensuel disponible = ce qui te reste après impôts, cotisations sociales, ET coût de vie standardisé (panier commun : logement, alimentation, transport, santé, utilities). Le score composite /100 pondère pouvoir d'achat (35%), pression fiscale (15%), qualité de vie (15%), accès visa (10%), liberté de sortie (10%), santé réelle (10%), infrastructures (5%).",
+                "Available monthly cashflow = what you keep after taxes, social contributions, AND a standardized cost-of-living basket (common basket: housing, food, transport, health, utilities). The composite score /100 weights purchasing power (35%), tax burden (15%), quality of life (15%), visa access (10%), exit freedom (10%), real healthcare (10%), infrastructure (5%)."
+              )}
+            </p>
+          </div>
         </>
       )}
     </div>

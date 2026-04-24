@@ -11,10 +11,10 @@ interface Props {
 }
 
 export function JurisdictionCard({ data, rank, onClick }: Props) {
-  const { t } = useI18n();
-  const { result, flowEUR, col, verdict, netInHandEUR, netAfterColAnnualEUR } = data;
-  // totalTax en EUR (l'ancien result.totalTax est dans la devise locale)
-  const totalTaxEUR = flowEUR.totalLevied;
+  const { t, locale } = useI18n();
+  const L = (fr: string, en: string) => (locale === "en" ? en : fr);
+  const { result, flowEUR, col, verdict, netInHandEUR, netAfterColAnnualEUR, netAfterColMonthlyEUR } = data;
+  const effectiveRateEUR = flowEUR.revenue > 0 ? flowEUR.totalLevied / flowEUR.revenue : 0;
 
   const exitLabel = {
     none: { key: "card.exitTax.none" as const, variant: "ok" },
@@ -24,36 +24,45 @@ export function JurisdictionCard({ data, rank, onClick }: Props) {
   }[verdict.exitTaxRisk];
 
   return (
-    <button
+    <div
       className="jcard"
       data-rank={rank + 1}
       onClick={onClick}
-      style={{
-        textAlign: "left",
-        width: "100%",
-        fontFamily: "inherit",
-        color: "inherit",
-        cursor: "pointer",
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onClick?.();
       }}
     >
       <div className="jcard-header">
         <div className="jcard-name">
-          <span style={{ marginRight: "0.5rem" }}>{FLAG[data.jurisdiction]}</span>
-          {LABEL[data.jurisdiction]}
-          {rank === 0 ? <span style={{ marginLeft: "0.5rem" }}>🥇</span> : null}
+          <span style={{ fontSize: "1.2rem" }}>{FLAG[data.jurisdiction]}</span>
+          <span>{LABEL[data.jurisdiction]}</span>
+          {rank === 0 ? <span aria-label="Rang 1">🥇</span> : null}
         </div>
-        <div className="jcard-score">
-          {t("card.score")} {verdict.score}/100
+        <span className="jcard-score">{verdict.score}/100</span>
+      </div>
+
+      <div>
+        <div className="jcard-cashflow">
+          {formatEUR(netAfterColMonthlyEUR)}
+          <span style={{ fontSize: "0.9rem", color: "var(--text-muted)", fontWeight: 500 }}>
+            /mois
+          </span>
+        </div>
+        <div className="jcard-cashflow-label">
+          {L("Cashflow réel mensuel", "Real monthly cashflow")}
         </div>
       </div>
+
       <div className="jcard-breakdown">
         <div className="jcard-row">
           <span className="text-muted">{t("card.structure")}</span>
-          <span style={{ fontSize: "0.8rem" }}>{result.structure}</span>
+          <span style={{ fontSize: "0.82rem", textAlign: "right" }}>{result.structure}</span>
         </div>
         <div className="jcard-row">
           <span className="text-muted">{t("card.taxesAndContrib")}</span>
-          <span className="text-danger">-{formatEUR(totalTaxEUR)}</span>
+          <span className="text-danger">-{formatEUR(flowEUR.totalLevied)}</span>
         </div>
         <div className="jcard-row">
           <span className="text-muted">{t("card.colAnnual")}</span>
@@ -69,14 +78,15 @@ export function JurisdictionCard({ data, rank, onClick }: Props) {
         </div>
         <div className="jcard-row">
           <span className="text-muted">{t("card.effectiveRate")}</span>
-          <span>{formatPercent(result.effectiveRate, 1)}</span>
+          <span>{formatPercent(effectiveRateEUR, 1)}</span>
         </div>
       </div>
-      <div className="row">
+
+      <div className="row" style={{ gap: "6px" }}>
         <span className="badge" data-variant={exitLabel.variant}>
           {t(exitLabel.key)}
         </span>
       </div>
-    </button>
+    </div>
   );
 }

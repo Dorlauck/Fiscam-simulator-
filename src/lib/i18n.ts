@@ -133,6 +133,30 @@ const STRINGS = {
     fr: "Âge",
     en: "Age",
   },
+  "form.comp.title": {
+    fr: "Rémunération France SASU (optionnel)",
+    en: "France SASU compensation (optional)",
+  },
+  "form.comp.hint": {
+    fr: "Tu peux piloter la répartition salaire / dividende pour la simulation France SASU. Les autres juridictions utilisent leurs propres règles.",
+    en: "You can pilot the salary vs dividend split for the France SASU simulation. Other jurisdictions use their own rules.",
+  },
+  "form.comp.salary.label": {
+    fr: "Salaire brut annuel",
+    en: "Gross annual salary",
+  },
+  "form.comp.salary.hint": {
+    fr: "Montant versé au président. 0 = pas de salaire (tout en dividende).",
+    en: "Amount paid to the president. 0 = no salary (everything via dividend).",
+  },
+  "form.comp.divNet.label": {
+    fr: "Dividende NET souhaité",
+    en: "Target NET dividend",
+  },
+  "form.comp.divNet.hint": {
+    fr: "Net après PFU 31.4%. Le simulateur calcule le brut et vérifie la faisabilité.",
+    en: "Net after 31.4% PFU flat tax. The simulator computes the gross and checks feasibility.",
+  },
   "form.next": {
     fr: "Suivant →",
     en: "Next →",
@@ -313,6 +337,116 @@ const STRINGS = {
   "staleness.banner": {
     fr: "⚠️ Les données fiscales datent de {date}. Les taux de l'année suivante ne sont peut-être pas encore intégrés. Vérifie les sources officielles avant toute décision.",
     en: "⚠️ Tax data dates from {date}. Next year's rates may not be integrated yet. Check official sources before any decision.",
+  },
+
+  // --- Salary vs Dividend comparison
+  "svd.title": {
+    fr: "Salaire vs Dividende — France SASU",
+    en: "Salary vs Dividend — France SASU",
+  },
+  "svd.subtitle": {
+    fr: "Pour chaque euro additionnel, quelle route coûte le moins à la société et laisse le plus au dirigeant ?",
+    en: "For each additional euro, which route costs the company less and leaves more for the director?",
+  },
+  "svd.salary.title": {
+    fr: "👔 Via Salaire",
+    en: "👔 Via Salary",
+  },
+  "svd.dividend.title": {
+    fr: "💰 Via Dividende",
+    en: "💰 Via Dividend",
+  },
+  "svd.costToCompany": {
+    fr: "Coût pour la société",
+    en: "Cost to the company",
+  },
+  "svd.netToDirector": {
+    fr: "Net en poche du dirigeant",
+    en: "Net in director's pocket",
+  },
+  "svd.efficiency": {
+    fr: "Efficacité (net / coût société)",
+    en: "Efficiency (net / company cost)",
+  },
+  "svd.breakdown.title": {
+    fr: "Pour 1 000 € additionnels de coût société",
+    en: "For €1,000 additional company cost",
+  },
+  "svd.salary.row.cost": {
+    fr: "Coût total société (salaire + cotisations patronales)",
+    en: "Total company cost (salary + employer contributions)",
+  },
+  "svd.salary.row.salaryGross": {
+    fr: "Dont salaire brut",
+    en: "Of which gross salary",
+  },
+  "svd.salary.row.employerContrib": {
+    fr: "Dont cotisations patronales (~45%)",
+    en: "Of which employer contributions (~45%)",
+  },
+  "svd.salary.row.employeeContrib": {
+    fr: "– Cotisations salariales (~22% du brut)",
+    en: "– Employee contributions (~22% of gross)",
+  },
+  "svd.salary.row.incomeTax": {
+    fr: "– IR (après abattement 10%, taux marginal)",
+    en: "– Income tax (after 10% abatement, marginal rate)",
+  },
+  "svd.salary.row.net": {
+    fr: "= Net en poche",
+    en: "= Net in pocket",
+  },
+  "svd.div.row.companyCost": {
+    fr: "Coût total société (avant IS)",
+    en: "Total company cost (before corp tax)",
+  },
+  "svd.div.row.is": {
+    fr: "– Impôt société (IS 15% ou 25%)",
+    en: "– Corporate income tax (15% or 25%)",
+  },
+  "svd.div.row.distributable": {
+    fr: "= Dividende brut distribuable",
+    en: "= Distributable gross dividend",
+  },
+  "svd.div.row.pfu": {
+    fr: "– PFU flat tax 31.4%",
+    en: "– 31.4% PFU flat tax",
+  },
+  "svd.div.row.net": {
+    fr: "= Net en poche",
+    en: "= Net in pocket",
+  },
+  "svd.advantages.salary.title": {
+    fr: "✓ Avantages du SALAIRE",
+    en: "✓ Salary advantages",
+  },
+  "svd.advantages.salary.list": {
+    fr: "Couverture maladie / maternité effective · Cotisations retraite (qualité nominalement valable) · Déductible de l'IS · Abattement IR 10% · Alimente la retraite Agirc-Arrco",
+    en: "Effective health/maternity coverage · Pension contributions (nominally valuable) · Deductible from corp tax · 10% income tax abatement · Feeds Agirc-Arrco retirement",
+  },
+  "svd.advantages.salary.warning": {
+    fr: "⚠ PAS de chômage (président SASU exclu). CSG/CRDS sans contrepartie.",
+    en: "⚠ NO unemployment (SASU president excluded). CSG/CRDS with no benefit.",
+  },
+  "svd.advantages.dividend.title": {
+    fr: "✓ Avantages du DIVIDENDE",
+    en: "✓ Dividend advantages",
+  },
+  "svd.advantages.dividend.list": {
+    fr: "Flat tax 31.4% simple et prévisible · Pas de cotisations sociales · Peut être accumulé dans la société · Modulable (distribution à la demande)",
+    en: "Simple, predictable 31.4% flat tax · No social contributions · Can be accumulated in the company · Flexible (distribute on demand)",
+  },
+  "svd.advantages.dividend.warning": {
+    fr: "⚠ Aucune protection sociale (santé, retraite, chômage) · Double imposition IS + PFU ≈ 47.5% cumulé.",
+    en: "⚠ No social safety net (health, pension, unemployment) · Double taxation corp + PFU ≈ 47.5% combined.",
+  },
+  "svd.verdict.salary": {
+    fr: "Plus efficient pour alimenter la retraite et bénéficier de la santé — mais cotisations lourdes.",
+    en: "More efficient for pension building and health coverage — but heavy contributions.",
+  },
+  "svd.verdict.dividend": {
+    fr: "Plus efficient en cash pur si vous n'avez pas besoin de protection sociale (jeune, santé privée ailleurs).",
+    en: "More efficient in raw cash if you don't need social coverage (young, private health elsewhere).",
   },
 
   // --- Footer / legal

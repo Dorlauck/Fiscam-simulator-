@@ -16,6 +16,10 @@ export interface FormState {
   familyStatus: "single" | "couple" | "couple_children";
   children: number;
   age: number;
+  /** Salaire brut annuel versé au dirigeant (France SASU). 0 = aucun salaire. */
+  salaryBrutAnnual: number;
+  /** Dividende net souhaité (après PFU) pour SASU France. 0 = pas de dividendes. */
+  dividendNetTarget: number;
   lifestyle: LifestyleInput;
   jurisdictions: Jurisdiction[];
   maltaAcknowledged: boolean;
@@ -43,6 +47,8 @@ const DEFAULT_STATE: FormState = {
   familyStatus: "single",
   children: 0,
   age: 35,
+  salaryBrutAnnual: 45_000,
+  dividendNetTarget: 20_000,
   lifestyle: {
     housingType: "t2",
     location: "center",
@@ -94,6 +100,10 @@ export function useSimulation() {
           revenue: {
             grossAnnual: form.grossAnnual,
             businessExpensesAnnual: form.businessExpenses,
+          },
+          compensation: {
+            salaryBrutAnnual: form.salaryBrutAnnual,
+            dividendNetTarget: form.dividendNetTarget,
           },
           personal: {
             familyStatus: form.familyStatus,
