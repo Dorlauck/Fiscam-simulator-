@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets, computeQuotientFamilialParts } from "../progressiveBrackets";
 
 interface FranceSasuData {
@@ -97,6 +97,33 @@ export function calculateSASU(input: SasuInput, data: FranceSasuData): Structure
   // 6. Totaux
   const totalTax = socialContributions + corporateTax + dividendTax + incomeTax;
   const netInHand = salaryNet - incomeTax + dividendNet;
+  const retained = Math.max(0, profitAfterIS - dividendDistributed);
+
+  const flow: TaxFlow = {
+    currency: "EUR",
+    revenue: input.revenueGross,
+    businessExpenses: input.businessExpenses,
+    salaryCost: totalSalaryCost,
+    profitBeforeCorpTax: profitBeforeIS,
+    corporateTax,
+    profitAfterCorpTax: profitAfterIS,
+    dividendGross: dividendDistributed,
+    retainedInCompany: retained,
+    salaryGross: input.salaryBrutAnnual,
+    employerContrib,
+    employeeContrib,
+    salaryNet,
+    salaryIncomeTax: incomeTax,
+    salaryTakeHome: salaryNet - incomeTax,
+    dividendTax,
+    dividendNet,
+    selfEmploymentTax: 0,
+    soleIncomeTax: 0,
+    otherTaxes: 0,
+    totalLevied: totalTax,
+    netTakeHome: netInHand,
+    retainedAmount: retained,
+  };
 
   return {
     structure: "SASU (IS)",
@@ -111,5 +138,6 @@ export function calculateSASU(input: SasuInput, data: FranceSasuData): Structure
     netInHand,
     effectiveRate: totalTax / input.revenueGross,
     warnings,
+    flow,
   };
 }

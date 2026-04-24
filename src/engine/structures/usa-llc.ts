@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets } from "../progressiveBrackets";
 
 interface UsaFederalData {
@@ -164,6 +164,34 @@ export function calculateUsaLLC(
   const totalTax = selfEmploymentTax + federalIR + stateIR + localIR + entityTax + mctmt;
   const netInHand = input.revenueGrossUSD - input.businessExpensesUSD - totalTax;
 
+  // LLC single-member = pass-through : pas de niveau "corporate", le profit entier est
+  // revenu personnel. On le modélise comme sole-prop.
+  const flow: TaxFlow = {
+    currency: "USD",
+    revenue: input.revenueGrossUSD,
+    businessExpenses: input.businessExpensesUSD,
+    salaryCost: 0,
+    profitBeforeCorpTax: 0,
+    corporateTax: 0,
+    profitAfterCorpTax: 0,
+    dividendGross: 0,
+    retainedInCompany: 0,
+    salaryGross: 0,
+    employerContrib: 0,
+    employeeContrib: 0,
+    salaryNet: 0,
+    salaryIncomeTax: 0,
+    salaryTakeHome: 0,
+    dividendTax: 0,
+    dividendNet: 0,
+    selfEmploymentTax,
+    soleIncomeTax: federalIR + stateIR + localIR,
+    otherTaxes: entityTax + mctmt,
+    totalLevied: totalTax,
+    netTakeHome: netInHand,
+    retainedAmount: 0,
+  };
+
   return {
     structure: `LLC sole prop (${input.state}${input.city ? " / " + input.city : ""})`,
     jurisdiction: input.state === "NY" ? "US_NY" : input.state === "CA" ? "US_CA" : "US_FL_MIAMI",
@@ -177,5 +205,6 @@ export function calculateUsaLLC(
     netInHand,
     effectiveRate: totalTax / input.revenueGrossUSD,
     warnings: [],
+    flow,
   };
 }

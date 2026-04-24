@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets } from "../progressiveBrackets";
 
 interface UkData {
@@ -119,13 +119,15 @@ export function calculateUkLtd(input: UkLtdInput, data: UkData): StructureResult
   }
   const socialContributions = employerNI + employeeNI;
 
-  // ---- 3. Corp Tax sur bénéfice après employer NI uniquement.
-  //         NOTE : la doc 07_EXAMPLES.md §3B calcule la CT sur (revenue - expenses - employer_NI)
-  //         sans déduire le salary du directeur. On suit ce calcul (Example 3B) : salaire retenu
-  //         mais non déduit de la base CT avant distribution.
+  // ---- 3. Corp Tax sur bénéfice après salaire + employer NI (HMRC-correct).
+  //         Le salaire versé au directeur est une charge déductible du résultat société.
+  //         L'exemple 3B de la doc 07_EXAMPLES.md oubliait de déduire le salaire de la base CT ;
+  //         on a corrigé, ce qui donne des valeurs différentes du doc mais mathématiquement
+  //         cohérentes (identité revenue = totalLevied + netTakeHome + retained + expenses).
+  const totalSalaryCost = salary + employerNI;
   const profitBeforeCT = Math.max(
     0,
-    input.revenueGrossGBP - input.businessExpensesGBP - employerNI
+    input.revenueGrossGBP - input.businessExpensesGBP - totalSalaryCost
   );
   const corporationTaxAmount = corporationTax(profitBeforeCT, data.corporationTax);
   const profitAfterCT = profitBeforeCT - corporationTaxAmount;
@@ -155,6 +157,33 @@ export function calculateUkLtd(input: UkLtdInput, data: UkData): StructureResult
     incomeTax +
     (dividendDistributed - dividendTaxAmount);
 
+  const retainedUK = Math.max(0, profitAfterCT - dividendDistributed);
+  const flow: TaxFlow = {
+    currency: "GBP",
+    revenue: input.revenueGrossGBP,
+    businessExpenses: input.businessExpensesGBP,
+    salaryCost: salary + employerNI,
+    profitBeforeCorpTax: profitBeforeCT,
+    corporateTax: corporationTaxAmount,
+    profitAfterCorpTax: profitAfterCT,
+    dividendGross: dividendDistributed,
+    retainedInCompany: retainedUK,
+    salaryGross: salary,
+    employerContrib: employerNI,
+    employeeContrib: employeeNI,
+    salaryNet: salary - employeeNI,
+    salaryIncomeTax: incomeTax,
+    salaryTakeHome: salary - employeeNI - incomeTax,
+    dividendTax: dividendTaxAmount,
+    dividendNet: dividendDistributed - dividendTaxAmount,
+    selfEmploymentTax: 0,
+    soleIncomeTax: 0,
+    otherTaxes: 0,
+    totalLevied: totalTax,
+    netTakeHome: netDirector,
+    retainedAmount: retainedUK,
+  };
+
   return {
     structure: "Ltd Company (UK)",
     jurisdiction: "UK",
@@ -168,5 +197,6 @@ export function calculateUkLtd(input: UkLtdInput, data: UkData): StructureResult
     netInHand: netDirector,
     effectiveRate: totalTax / input.revenueGrossGBP,
     warnings: [],
+    flow,
   };
 }

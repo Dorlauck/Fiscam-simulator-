@@ -1,5 +1,6 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets, computeQuotientFamilialParts } from "../progressiveBrackets";
+import { emptyFlow } from "../flow";
 
 type MicroActivity = "sales_BIC" | "services_BIC" | "liberal_BNC_nonCipav" | "liberal_BNC_cipav";
 
@@ -81,6 +82,7 @@ export function calculateMicroEntreprise(
       ],
       capExceeded: true,
       suggestedStructure: "SASU",
+      flow: emptyFlow("EUR", input.revenueGross),
     };
   }
 
@@ -121,6 +123,34 @@ export function calculateMicroEntreprise(
   const totalTax = socialContributions + cfp + incomeTax;
   const netInHand = input.revenueGross - totalTax;
 
+  // Flow : la micro-entreprise est un pass-through sans société.
+  // Pas de niveau corporate. Le CA brut va direct au freelance, qui paie cotis + CFP + IR.
+  const flow: TaxFlow = {
+    currency: "EUR",
+    revenue: input.revenueGross,
+    businessExpenses: 0, // micro = forfaitaire (abattement), pas de charges réelles
+    salaryCost: 0,
+    profitBeforeCorpTax: 0,
+    corporateTax: 0,
+    profitAfterCorpTax: 0,
+    dividendGross: 0,
+    retainedInCompany: 0,
+    salaryGross: 0,
+    employerContrib: 0,
+    employeeContrib: 0,
+    salaryNet: 0,
+    salaryIncomeTax: 0,
+    salaryTakeHome: 0,
+    dividendTax: 0,
+    dividendNet: 0,
+    selfEmploymentTax: socialContributions,
+    soleIncomeTax: incomeTax,
+    otherTaxes: cfp,
+    totalLevied: totalTax,
+    netTakeHome: netInHand,
+    retainedAmount: 0,
+  };
+
   return {
     structure: "micro-entreprise",
     jurisdiction: "FR",
@@ -134,5 +164,6 @@ export function calculateMicroEntreprise(
     netInHand,
     effectiveRate: totalTax / input.revenueGross,
     warnings,
+    flow,
   };
 }
