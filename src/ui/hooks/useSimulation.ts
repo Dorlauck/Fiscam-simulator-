@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Jurisdiction, LifestyleInput, Profile, StructureResult } from "@/engine/types";
+import type { Jurisdiction, LifestyleInput, Profile, StructureResult, TaxFlow } from "@/engine/types";
 import { calculateTax } from "@/engine/calculateTax";
+import { flowToEUR } from "@/engine/flow";
 import { calculateCostOfLiving, type CostOfLivingResult } from "@/costOfLiving/calculate";
 import { getQualityOfLife, type QualityOfLife } from "@/scoring/qolIndex";
 import { buildVerdict, type VerdictSummary } from "@/scoring/composite";
@@ -22,7 +23,10 @@ export interface FormState {
 
 export interface JurisdictionResult {
   jurisdiction: Jurisdiction;
+  /** Résultat brut du moteur — dans la devise locale. Ne pas afficher directement. */
   result: StructureResult;
+  /** Flow fiscal détaillé, converti en EUR pour affichage. */
+  flowEUR: TaxFlow;
   col: CostOfLivingResult;
   qol: QualityOfLife;
   verdict: VerdictSummary;
@@ -105,7 +109,9 @@ export function useSimulation() {
         });
         const qol = getQualityOfLife(j);
 
-        const netInHandEUR = toEur(result.netInHand, j);
+        // Conversion EN MASSE du flow en EUR — plus aucune valeur locale ne fuit vers l'UI
+        const flowEUR = flowToEUR(result.flow);
+        const netInHandEUR = flowEUR.netTakeHome;
         const verdict = buildVerdict({
           result,
           col,
@@ -123,6 +129,7 @@ export function useSimulation() {
         return {
           jurisdiction: j,
           result,
+          flowEUR,
           col,
           qol,
           verdict,

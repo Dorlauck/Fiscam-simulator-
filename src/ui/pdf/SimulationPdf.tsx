@@ -142,7 +142,7 @@ export function SimulationPdf({ results, form, locale, generatedAt = new Date() 
             <Text style={styles.cellRank}>{i + 1}</Text>
             <Text style={styles.cellFlag}>{FLAG[r.jurisdiction]}</Text>
             <Text style={styles.cellName}>{LABEL[r.jurisdiction]}</Text>
-            <Text style={styles.cellNum}>-{formatEurPlain(r.result.totalTax)}</Text>
+            <Text style={styles.cellNum}>-{formatEurPlain(r.flowEUR.totalLevied)}</Text>
             <Text style={styles.cellNum}>-{formatEurPlain(r.col.totalAnnual)}</Text>
             <Text style={styles.cellNum}>{formatEurPlain(r.netInHandEUR)}</Text>
             <Text style={styles.cellNum}>{formatEurPlain(r.netAfterColAnnualEUR)}</Text>
@@ -151,13 +151,45 @@ export function SimulationPdf({ results, form, locale, generatedAt = new Date() 
         ))}
 
         {results.slice(0, 3).map((r) => {
-          const b = r.result.socialContributionsBreakdown;
+          const f = r.flowEUR;
+          // Breakdown des cotisations en EUR (même facteur de conversion que le flow)
+          const factor =
+            r.jurisdiction === "JP"
+              ? 1 / 163
+              : r.jurisdiction === "UK"
+                ? 1 / 0.83
+                : r.jurisdiction.startsWith("US")
+                  ? 1 / 1.09
+                  : 1;
+          const eff = r.result.socialContributionsBreakdown.effectivelyValuable * factor;
+          const nom = r.result.socialContributionsBreakdown.nominallyValuable * factor;
+          const pure = r.result.socialContributionsBreakdown.pureCost * factor;
+          const effRate = f.revenue > 0 ? f.totalLevied / f.revenue : 0;
+
           return (
             <View key={r.jurisdiction} style={styles.section} wrap={false}>
               <Text style={styles.h3}>
                 {FLAG[r.jurisdiction]} {LABEL[r.jurisdiction]} · {r.result.structure} ·{" "}
-                {formatPercentPlain(r.result.effectiveRate)}
+                {formatPercentPlain(effRate)}
               </Text>
+              {/* Mini-waterfall : CA → IS → salaire/dividende → net */}
+              <View style={{ marginTop: 2, marginBottom: 4 }}>
+                {f.corporateTax > 0 && (
+                  <Text style={{ fontSize: 8 }}>
+                    CA {formatEurPlain(f.revenue)} → IS -{formatEurPlain(f.corporateTax)} →
+                    salaire {formatEurPlain(f.salaryGross)} + div {formatEurPlain(f.dividendGross)}
+                    {f.retainedAmount > 0 ? ` (réserve ${formatEurPlain(f.retainedAmount)})` : ""}
+                    {" → net "}
+                    {formatEurPlain(f.netTakeHome)}
+                  </Text>
+                )}
+                {f.corporateTax === 0 && (
+                  <Text style={{ fontSize: 8 }}>
+                    CA {formatEurPlain(f.revenue)} - cotis {formatEurPlain(f.selfEmploymentTax)} -
+                    IR {formatEurPlain(f.soleIncomeTax)} → net {formatEurPlain(f.netTakeHome)}
+                  </Text>
+                )}
+              </View>
               <View style={styles.prosCons}>
                 <View style={styles.prosCol}>
                   <Text style={styles.prosTitle}>✓ Pros</Text>
@@ -185,11 +217,11 @@ export function SimulationPdf({ results, form, locale, generatedAt = new Date() 
                 </View>
               </View>
               <Text style={{ fontSize: 8, color: "#64748b", marginTop: 2 }}>
-                {t("detail.row.effectivelyValuable")}: {formatEurPlain(b.effectivelyValuable)}
+                {t("detail.row.effectivelyValuable")}: {formatEurPlain(eff)}
                 {"   "}
-                {t("detail.row.nominallyValuable")}: {formatEurPlain(b.nominallyValuable)}
+                {t("detail.row.nominallyValuable")}: {formatEurPlain(nom)}
                 {"   "}
-                {t("detail.row.pureCost")}: {formatEurPlain(b.pureCost)}
+                {t("detail.row.pureCost")}: {formatEurPlain(pure)}
               </Text>
             </View>
           );

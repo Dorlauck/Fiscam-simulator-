@@ -7,6 +7,7 @@ import { calculateCostOfLiving } from "@/costOfLiving/calculate";
 import { getQualityOfLife } from "@/scoring/qolIndex";
 import { buildVerdict } from "@/scoring/composite";
 import { generateProsCons } from "@/scoring/prosCons";
+import { flowToEUR } from "@/engine/flow";
 import type { Jurisdiction } from "@/engine/types";
 
 const form: FormState = {
@@ -36,15 +37,15 @@ function mkResult(j: Jurisdiction): JurisdictionResult {
   });
   const col = calculateCostOfLiving({ jurisdiction: j, lifestyle: form.lifestyle, age: 35 });
   const qol = getQualityOfLife(j);
-  const toEur = (n: number) =>
-    j.startsWith("US") ? n / 1.09 : j === "UK" ? n / 0.83 : j === "JP" ? n / 163 : n;
-  const netInHandEUR = toEur(result.netInHand);
+  const flowEUR = flowToEUR(result.flow);
+  const netInHandEUR = flowEUR.netTakeHome;
   const verdict = buildVerdict({ result, col, qol, revenueGrossEUR: form.grossAnnual, netInHandEUR });
   const prosCons = generateProsCons({ result, col, qol, revenueGrossEUR: form.grossAnnual });
   const netAfterColAnnualEUR = netInHandEUR - col.totalAnnual;
   return {
     jurisdiction: j,
     result,
+    flowEUR,
     col,
     qol,
     verdict,

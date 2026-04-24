@@ -17,25 +17,25 @@ const expectWithin = (actual: number, expected: number, tolerancePct = 0.01) => 
 // COGS 289k, OpEx 41.3k → Profit before salary 82.7k
 // Salary £12 570 (personal allowance), dividend target £70 130
 //
-// Employer NI : 1 135 ✓
-// Corp Tax   : 17 865 ✓ (marginal relief 3/200)
-// Dividende distribué : £63 700 (= 81 565 - 17 865)
+// NOTE : l'exemple 3B dans 07_EXAMPLES.md contient DEUX erreurs arithmétiques
+// qui brisent l'identité comptable (revenue = taxes + net + retenu + charges) :
+//   1) Base Corp Tax : la doc calcule CT sur (revenue - expenses - employer_NI)
+//      sans déduire le salary. HMRC : CT base = profit après déduction du salaire.
+//      → CT correct ≈ £14 534 (au lieu de £17 865)
+//   2) Higher-rate slice dividende : la doc écrit "13 430" alors que le total
+//      income atteint £76 270, donc la tranche higher vaut 16 761 de dividende
+//      taxable après remplissage de la tranche basique.
+//      → Dividend tax ≈ £9 991 (au lieu de £8 800)
 //
-// NOTE : l'exemple 3B dans 07_EXAMPLES.md contient une erreur arithmétique
-// sur la tranche higher rate dividende : il écrit "Higher rate slice
-// (50,270 to 63,700 total) = 13 430 × 35.75%" alors que le total income
-// atteint £76 270 (salary + div), donc la higher slice vaut 26 000 et non
-// 13 430. Le calcul HMRC correct donne :
-//   Basic  : (37 700 - 500) × 10.75% =  3 999
-//   Higher : 26 000 × 35.75%           =  9 295
-//   Total dividend tax                 = 13 294 (et non 8 800)
-// Total taxes GBP réel ≈ 32 294 (et non 27 800).
-// Net director réel ≈ 62 976 (et non 67 470).
-//
-// On teste le calcul HMRC-correct. Les valeurs "doc" sont documentées
-// mais pas utilisées comme référence.
+// Valeurs HMRC-correctes (avec identité comptable vérifiée) :
+//   Employer NI     : £1 135
+//   CT              : £14 534
+//   Div tax         : £9 991
+//   Total taxes     : £25 660
+//   Net director    : £57 040
+//   Dividende distribué : £54 461 (= profitAfterCT, < cible £70 130)
 // =====================================================================
-describe("Exemple 3B — UK Ltd Co £413 000", () => {
+describe("Exemple 3B — UK Ltd Co £413 000 (HMRC-correct)", () => {
   const r = calculateUkLtd(
     {
       revenueGrossGBP: 413_000,
@@ -52,23 +52,29 @@ describe("Exemple 3B — UK Ltd Co £413 000", () => {
     expectWithin(r.socialContributions, 1_135, 0.02);
   });
 
-  it("Corporation Tax ≈ £17 865 (marginal relief 3/200)", () => {
-    expectWithin(r.corporateTax, 17_865, 0.02);
+  it("Corporation Tax HMRC-correct ≈ £14 534 (CT base inclut salaire déduit)", () => {
+    expectWithin(r.corporateTax, 14_534, 0.02);
   });
 
   it("IR sur salaire = 0 (dans personal allowance £12 570)", () => {
     expect(r.incomeTax).toBe(0);
   });
 
-  it("Dividend tax HMRC-correct ≈ £13 294 (basic 3 999 + higher 9 295)", () => {
-    expectWithin(r.dividendTax, 13_294, 0.01);
+  it("Dividend tax HMRC-correct ≈ £9 991", () => {
+    expectWithin(r.dividendTax, 9_991, 0.02);
   });
 
-  it("total taxes ≈ £32 294 (HMRC-correct)", () => {
-    expectWithin(r.totalTax, 32_294, 0.02);
+  it("total taxes ≈ £25 660 (HMRC-correct)", () => {
+    expectWithin(r.totalTax, 25_660, 0.02);
   });
 
-  it("net director ≈ £62 976 (salary 12 570 + dividende net 50 406)", () => {
-    expectWithin(r.netInHand, 62_976, 0.02);
+  it("net director ≈ £57 040", () => {
+    expectWithin(r.netInHand, 57_040, 0.02);
+  });
+
+  it("identité comptable : revenue = expenses + totalLevied + netTakeHome + retained", () => {
+    const f = r.flow;
+    const sum = f.businessExpenses + f.totalLevied + f.netTakeHome + f.retainedAmount;
+    expect(Math.abs(sum - f.revenue) / f.revenue).toBeLessThan(0.005);
   });
 });

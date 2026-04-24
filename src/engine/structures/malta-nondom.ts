@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets } from "../progressiveBrackets";
 
 interface MaltaData {
@@ -56,6 +56,32 @@ export function calculateMaltaNonDom(
     pureCost: incomeTax,
   };
 
+  const flow: TaxFlow = {
+    currency: "EUR",
+    revenue: grossAccessible,
+    businessExpenses: 0,
+    salaryCost: 0,
+    profitBeforeCorpTax: 0,
+    corporateTax: 0,
+    profitAfterCorpTax: 0,
+    dividendGross: 0,
+    retainedInCompany: 0,
+    salaryGross: 0,
+    employerContrib: 0,
+    employeeContrib: 0,
+    salaryNet: 0,
+    salaryIncomeTax: 0,
+    salaryTakeHome: 0,
+    dividendTax: 0,
+    dividendNet: 0,
+    selfEmploymentTax: 0,
+    soleIncomeTax: incomeTax,
+    otherTaxes: 0,
+    totalLevied: incomeTax,
+    netTakeHome: netInHand,
+    retainedAmount: 0,
+  };
+
   return {
     structure: "Malta non-dom (remittance basis)",
     jurisdiction: "MT",
@@ -71,6 +97,7 @@ export function calculateMaltaNonDom(
     warnings: [
       "Scheme Malta non-dom valide UNIQUEMENT si vous résidez réellement à Malte (>183 jours/an) avec substance économique. Voir règles CFC 209B du CGI français.",
     ],
+    flow,
   };
 }
 

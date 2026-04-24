@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets, computeQuotientFamilialParts } from "../progressiveBrackets";
 
 interface FranceEurlData {
@@ -88,6 +88,36 @@ export function calculateEURL_TNS(input: EurlInput, data: FranceEurlData): Struc
   const netInHand =
     input.remunerationBrute - socialContributions - incomeTax + dividendNet + retainedEarnings;
 
+  // Flow : EURL = gérant TNS assimilable à un salarié particulier.
+  // Le "salaire" TNS n'a pas d'employerContrib comme SASU : les cotisations TNS sont sur
+  // la rémunération brute et sont déduites du résultat société comme charge.
+  const flow: TaxFlow = {
+    currency: "EUR",
+    revenue: input.revenueGross,
+    businessExpenses: input.businessExpenses,
+    salaryCost: input.remunerationBrute + socialContributions,
+    profitBeforeCorpTax: profitBeforeIS,
+    corporateTax,
+    profitAfterCorpTax: profitAfterIS,
+    dividendGross: dividendDistributed,
+    retainedInCompany: retainedEarnings,
+    salaryGross: input.remunerationBrute,
+    employerContrib: 0, // TNS : pas de distinction patronal/salarial
+    employeeContrib: socialContributions,
+    salaryNet: input.remunerationBrute - socialContributions,
+    salaryIncomeTax: incomeTax,
+    salaryTakeHome: input.remunerationBrute - socialContributions - incomeTax,
+    dividendTax,
+    dividendNet,
+    selfEmploymentTax: 0,
+    soleIncomeTax: 0,
+    otherTaxes: 0,
+    totalLevied: totalTax,
+    // netTakeHome : ce que le gérant a VRAIMENT en poche (hors réserves société)
+    netTakeHome: input.remunerationBrute - socialContributions - incomeTax + dividendNet,
+    retainedAmount: retainedEarnings,
+  };
+
   return {
     structure: "EURL à l'IS (gérant TNS)",
     jurisdiction: "FR",
@@ -101,5 +131,6 @@ export function calculateEURL_TNS(input: EurlInput, data: FranceEurlData): Struc
     netInHand,
     effectiveRate: totalTax / input.revenueGross,
     warnings,
+    flow,
   };
 }

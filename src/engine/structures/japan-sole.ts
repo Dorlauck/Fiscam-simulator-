@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyJapaneseBracket } from "../progressiveBrackets";
 
 interface JapanData {
@@ -86,6 +86,32 @@ export function calculateJapanSoleProp(
     nationalIR + reconstructionSurtax + localIR + enterpriseTax + socialContributions;
   const netInHand = input.revenueGrossJPY - input.businessExpensesJPY - totalTax;
 
+  const flow: TaxFlow = {
+    currency: "JPY",
+    revenue: input.revenueGrossJPY,
+    businessExpenses: input.businessExpensesJPY,
+    salaryCost: 0,
+    profitBeforeCorpTax: 0,
+    corporateTax: 0,
+    profitAfterCorpTax: 0,
+    dividendGross: 0,
+    retainedInCompany: 0,
+    salaryGross: 0,
+    employerContrib: 0,
+    employeeContrib: 0,
+    salaryNet: 0,
+    salaryIncomeTax: 0,
+    salaryTakeHome: 0,
+    dividendTax: 0,
+    dividendNet: 0,
+    selfEmploymentTax: socialContributions,
+    soleIncomeTax: nationalIR + reconstructionSurtax + localIR,
+    otherTaxes: enterpriseTax,
+    totalLevied: totalTax,
+    netTakeHome: netInHand,
+    retainedAmount: 0,
+  };
+
   return {
     structure: `Japan Sole Prop (${input.useBlueReturn ? "Blue" : "White"} Return)`,
     jurisdiction: "JP",
@@ -99,5 +125,6 @@ export function calculateJapanSoleProp(
     netInHand,
     effectiveRate: totalTax / input.revenueGrossJPY,
     warnings: [],
+    flow,
   };
 }

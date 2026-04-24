@@ -1,4 +1,4 @@
-import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult } from "../types";
+import type { Bracket, ContributionBreakdown, FamilyStatus, StructureResult, TaxFlow } from "../types";
 import { applyProgressiveBrackets } from "../progressiveBrackets";
 
 interface UsaFederalData {
@@ -126,6 +126,43 @@ export function calculateUsaSCorp(
 
   const totalTax = payrollTotal + federalIR + stateIR + localIR + entityTax;
   const netInHand = input.revenueGrossUSD - input.businessExpensesUSD - totalTax;
+  const retainedInCompany = Math.max(0, profitBeforeComp - salary - employerFICA - distribution);
+
+  // S-Corp : structure distribue bien entre salaire (W-2, soumis FICA) et distribution (K-1, pass-through).
+  // Pas de corporate tax fédéral (sauf CA 1.5% que l'on classe en "entityTax").
+  // L'IR personnel frappe salary + distribution (avec QBI sur distribution).
+  // On impute l'IR proportionnellement au salaire et à la distribution pour la colonne "salary income tax" vs "dividend".
+  const salaryShare = salary + distribution > 0 ? salary / (salary + distribution) : 0;
+  const distribShare = 1 - salaryShare;
+  const personalIncomeTaxTotal = federalIR + stateIR + localIR;
+
+  const flow: TaxFlow = {
+    currency: "USD",
+    revenue: input.revenueGrossUSD,
+    businessExpenses: input.businessExpensesUSD,
+    salaryCost: salary + employerFICA,
+    profitBeforeCorpTax: profitBeforeComp,
+    corporateTax: 0,
+    profitAfterCorpTax: profitBeforeComp - salary - employerFICA,
+    dividendGross: distribution,
+    retainedInCompany,
+    salaryGross: salary,
+    employerContrib: employerFICA,
+    employeeContrib: employeeFICA,
+    salaryNet: salary - employeeFICA,
+    salaryIncomeTax: personalIncomeTaxTotal * salaryShare,
+    salaryTakeHome: salary - employeeFICA - personalIncomeTaxTotal * salaryShare,
+    // Aux US il n'y a pas de "dividend tax" spécifique pour S-Corp (distribution = K-1 passée à l'IR).
+    // On met 0 ici et on attribue la part correspondante d'IR dans dividendTax pour l'UI.
+    dividendTax: personalIncomeTaxTotal * distribShare,
+    dividendNet: distribution - personalIncomeTaxTotal * distribShare,
+    selfEmploymentTax: 0,
+    soleIncomeTax: 0,
+    otherTaxes: entityTax,
+    totalLevied: totalTax,
+    netTakeHome: salary - employeeFICA + distribution - personalIncomeTaxTotal,
+    retainedAmount: retainedInCompany,
+  };
 
   return {
     structure: `S-Corp (${input.state}${input.city ? " / " + input.city : ""})`,
@@ -140,5 +177,6 @@ export function calculateUsaSCorp(
     netInHand,
     effectiveRate: totalTax / input.revenueGrossUSD,
     warnings: [],
+    flow,
   };
 }

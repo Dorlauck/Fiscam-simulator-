@@ -12,7 +12,9 @@ interface Props {
 
 export function JurisdictionCard({ data, rank, onClick }: Props) {
   const { t } = useI18n();
-  const { result, col, verdict, netInHandEUR, netAfterColAnnualEUR } = data;
+  const { result, flowEUR, col, verdict, netInHandEUR, netAfterColAnnualEUR } = data;
+  // totalTax en EUR (l'ancien result.totalTax est dans la devise locale)
+  const totalTaxEUR = flowEUR.totalLevied;
 
   const exitLabel = {
     none: { key: "card.exitTax.none" as const, variant: "ok" },
@@ -51,7 +53,7 @@ export function JurisdictionCard({ data, rank, onClick }: Props) {
         </div>
         <div className="jcard-row">
           <span className="text-muted">{t("card.taxesAndContrib")}</span>
-          <span className="text-danger">-{formatEUR(result.totalTax)}</span>
+          <span className="text-danger">-{formatEUR(totalTaxEUR)}</span>
         </div>
         <div className="jcard-row">
           <span className="text-muted">{t("card.colAnnual")}</span>
