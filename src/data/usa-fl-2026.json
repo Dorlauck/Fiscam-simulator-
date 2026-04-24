@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "country": "USA",
+    "city": "Miami",
+    "state": "Florida",
+    "currency": "USD",
+    "fiscalYear": 2026,
+    "lastUpdated": "2026-04-24",
+    "exchangeRate_EUR_USD": 1.09,
+    "sources": [
+      "Florida Constitution (no personal income tax)",
+      "Florida Department of Revenue",
+      "IRS Revenue Procedure 2025-32"
+    ]
+  },
+
+  "federal_inheritsFrom": "usa-ny-2026.json#federal",
+
+  "fl_state": {
+    "personalIncomeTax": 0,
+    "corporateTax_cCorp": 0.055,
+    "salesTax_miamiDade": 0.07,
+    "note": "Pas d'impôt sur le revenu des personnes physiques. C-Corp 5.5%. Pas de franchise tax LLC."
+  },
+
+  "miami_local": {
+    "personalIncomeTax": 0,
+    "note": "Miami/Miami-Dade n'a pas d'impôt local sur le revenu."
+  },
+
+  "hiddenCosts_Florida": {
+    "homeownersInsurance_1br_annual_USD_avg": 5500,
+    "floodInsurance_coastal_annual_USD_avg": 2000,
+    "carRequired": true,
+    "note": "Pas de transport public efficace à Miami. Véhicule + assurances ouragans/inondations requis. Healthcare privée non-subventionnée."
+  },
+
+  "costOfLiving_Miami_2026_USD": {
+    "rent_1br_center_monthly": 2800,
+    "rent_1br_periphery_monthly": 2000,
+    "rent_2br_center_monthly": 4200,
+    "groceries_single_monthly": 450,
+    "restaurant_midrange_2pax": 80,
+    "utilities_monthly": 220,
+    "internet_monthly": 75,
+    "transit_monthly": 0,
+    "gym_monthly": 60,
+    "healthInsurance_private_monthly": 625,
+    "car_monthly_estimate": 600
+  },
+
+  "infrastructureScore": {
+    "internet": 8,
+    "publicTransport": 3,
+    "banking_foreigners": 7,
+    "coworking": 7,
+    "fintech_ecosystem": 7
+  },
+
+  "visaComplexity": {
+    "score": 8,
+    "note": "Mêmes contraintes fédérales qu'NY. Floride très accueillante business-wise mais les règles d'immigration sont fédérales."
+  },
+
+  "socialSecurityPerception_inheritsFrom": "usa-ny-2026.json#socialSecurityPerception"
+}

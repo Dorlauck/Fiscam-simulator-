@@ -1,0 +1,238 @@
+{
+  "meta": {
+    "country": "United Kingdom",
+    "city": "London",
+    "currency": "GBP",
+    "fiscalYear": "2026/27",
+    "fiscalYearStart": "2026-04-06",
+    "fiscalYearEnd": "2027-04-05",
+    "lastUpdated": "2026-04-24",
+    "exchangeRate_EUR_GBP": 0.83,
+    "sources": [
+      "HMRC 2026/27 guidance",
+      "Autumn Budget 2025 (announced Nov 2025)",
+      "Finance Act 2026",
+      "Making Tax Digital for ITSA rules (effective April 2026)"
+    ]
+  },
+
+  "personalAllowance_GBP": 12570,
+  "personalAllowance_taperThreshold": 100000,
+  "personalAllowance_taperEndedAt": 125140,
+
+  "incomeTaxBrackets_2026_27_GBP": [
+    { "min": 0,       "max": 12570,   "rate": 0.00,  "name": "Personal Allowance" },
+    { "min": 12570,   "max": 50270,   "rate": 0.20,  "name": "Basic rate" },
+    { "min": 50270,   "max": 125140,  "rate": 0.40,  "name": "Higher rate" },
+    { "min": 125140,  "max": null,    "rate": 0.45,  "name": "Additional rate" }
+  ],
+
+  "nationalInsurance": {
+    "class1_employee_2026_27": {
+      "primaryThreshold": 12570,
+      "upperEarningsLimit": 50270,
+      "rate_below_UEL": 0.08,
+      "rate_above_UEL": 0.02
+    },
+    "class1_employer_2026_27": {
+      "secondaryThreshold": 5000,
+      "rate": 0.15,
+      "note": "Employeur paie 15% au-delà de £5k/an — alourdissement significatif vs années précédentes"
+    },
+    "class2_selfEmployed": {
+      "abolished_from_2024_04": true,
+      "note": "Abolie depuis avril 2024. Les freelances gardent l'éligibilité State Pension via crédits sans payer."
+    },
+    "class4_selfEmployed_2026_27": {
+      "lowerProfitsLimit": 12570,
+      "upperProfitsLimit": 50270,
+      "rate_below_UPL": 0.06,
+      "rate_above_UPL": 0.02,
+      "note": "Class 4 NI réduite par Sunak à 6% fin 2024"
+    },
+    "classification": {
+      "statePension_nominallyValuable": "Portion retraite du NI — State Pension à 68 ans",
+      "NHS_mixedValue": "Partie santé — NHS existe mais délais d'attente longs",
+      "note": "NI = mix retraite + NHS + bénéfices — moins directement cashback que France"
+    }
+  },
+
+  "dividendTax": {
+    "dividendAllowance_GBP_2026_27": 500,
+    "rates_2026_27": {
+      "basic": 0.1075,
+      "higher": 0.3575,
+      "additional": 0.3935
+    },
+    "rates_2025_26_forComparison": {
+      "basic": 0.0875,
+      "higher": 0.3375,
+      "additional": 0.3935
+    },
+    "note": "Augmentation significative en avril 2026 : basic +2pp, higher +2pp. Impact majeur pour directeurs de Ltd Co."
+  },
+
+  "corporationTax": {
+    "smallProfitsRate_below_50k": 0.19,
+    "mainRate_above_250k": 0.25,
+    "marginalRelief_between_50k_250k": true,
+    "marginalRelief_fraction": "3/200",
+    "note": "Taux réel entre 50k et 250k : entre 19% et 25% avec taper"
+  },
+
+  "structures": {
+    "soleTrader": {
+      "description": "Self-employed direct : income tax progressive + Class 4 NI",
+      "effectiveTopRate_approx": 0.47,
+      "madeTaxDigital_required_from_2026_04": true,
+      "MTD_threshold_2026": 50000,
+      "MTD_threshold_2027": 30000,
+      "MTD_threshold_2028": 20000
+    },
+    "limitedCompany": {
+      "description": "Société + directeur. Classique : petit salaire (£12,570 = personal allowance) + dividendes",
+      "optimalStrategy_2026_27": {
+        "salary_GBP": 12570,
+        "dividend_GBP": 37700,
+        "totalGross_GBP": 50270,
+        "totalTax_approx_GBP": 4000,
+        "takeHome_approx_GBP": 46270,
+        "note": "Stratégie reste efficiente mais MOINS qu'avant hausse 2026"
+      },
+      "corporationTax_first": "Profit company taxé à 19/25% avant distribution",
+      "doubleTaxation_effective_topBracket": "~49% (25% corp + 35.75% dividende sur net)"
+    },
+    "ir35_offPayroll": {
+      "description": "Anti-avoidance rules pour freelances traités 'comme employés'",
+      "riskForContractors": "HIGH",
+      "note": "Client décide si le contrat est 'inside IR35' → traité comme employé pour impôts, perte des avantages Ltd Co"
+    }
+  },
+
+  "capitalGainsTax_2026_27": {
+    "annualExemption_GBP": 3000,
+    "basicRate_nonProperty": 0.18,
+    "higherRate_nonProperty": 0.24,
+    "residentialProperty_basic": 0.18,
+    "residentialProperty_higher": 0.24,
+    "businessAssetDisposalRelief_BADR": {
+      "rate": 0.18,
+      "rate_previous_2025": 0.14,
+      "note": "BADR (ex-Entrepreneurs' Relief) est passé de 10% → 14% → 18% (avril 2026). Vendre sa boîte coûte beaucoup plus cher qu'avant.",
+      "lifetimeLimit_GBP": 1000000
+    },
+    "carriedInterest_from_2026_04": {
+      "rate": "treated as trading profit (income tax + NI)",
+      "note": "Fin du régime CGT favorable — désormais imposé comme income"
+    }
+  },
+
+  "vat": {
+    "standardRate": 0.20,
+    "reducedRate": 0.05,
+    "zeroRate": 0.00,
+    "registrationThreshold_GBP": 90000,
+    "note": "Le seuil d'assujettissement TVA à £90k reste avantageux pour micro-entreprises vs France"
+  },
+
+  "councilTax": {
+    "varies_by_borough": true,
+    "London_average_band_D_annual_GBP": 1800,
+    "note": "Taxe locale sur logement occupé — paid par l'occupant"
+  },
+
+  "nonDom_FIG_regime_from_2025_04": {
+    "replaces_old_nonDom": true,
+    "name": "Foreign Income and Gains (FIG) regime",
+    "duration": "4 years maximum",
+    "eligibility": "New arrivals who have been non-UK resident for 10 consecutive tax years",
+    "benefit": "100% exemption on foreign income & gains for first 4 UK tax years",
+    "transitional_for_former_remittance_users": "Temporary Repatriation Facility",
+    "warning": "Ancien régime non-dom (indéfini) est TERMINÉ. Le UK n'est plus un paradis fiscal non-dom long-terme contrairement à Malte."
+  },
+
+  "inheritanceTax_IHT": {
+    "nilRateBand_GBP": 325000,
+    "residenceNilRateBand_GBP": 175000,
+    "rate_above_threshold": 0.40,
+    "businessPropertyRelief_2026_change": {
+      "cap_GBP": 2500000,
+      "rate_above_cap": "50% relief instead of 100%",
+      "effectiveIHT_above_cap": 0.20,
+      "AIM_shares_2026_change": "Limited to 50% relief regardless of value"
+    },
+    "warning": "Reforme 2026 majeure : relief illimité (100%) sur actifs business pour IHT limité à £2.5M. Impact majeur pour transmission d'entreprise."
+  },
+
+  "temporaryNonResidenceRule": {
+    "exists": true,
+    "duration_years": 5,
+    "note": "Si on redevient résident UK <5 ans après avoir quitté, certains revenus accumulés à l'étranger deviennent taxables rétroactivement au retour. Piège à éviter pour les 'quitter 2-3 ans et revenir'."
+  },
+
+  "socialSecurityPerception": {
+    "NHS": {
+      "classification": "mixed",
+      "quality": 6,
+      "waitTimes": "Significatif pour spécialistes (mois), bon pour urgences",
+      "privateSupplement_common": true,
+      "privateInsurance_monthly_avg_GBP": 80
+    },
+    "statePension": {
+      "classification": "nominallyValuable",
+      "currentMaxWeekly_GBP": 221.20,
+      "eligibility": "35 years of full NI contributions",
+      "retirementAge": 68,
+      "reason": "State Pension existe mais ~£11,500/an max — insuffisant pour vivre seul à Londres. Ratio démographique se dégrade aussi."
+    },
+    "universalCredit": {
+      "note": "Non applicable pour entrepreneurs en activité"
+    }
+  },
+
+  "exitTax": {
+    "exists": false,
+    "note": "Pas d'exit tax au sens strict. Mais Temporary Non-Residence Rule (5 ans) capture certains gains si retour prématuré.",
+    "impactScore": 2
+  },
+
+  "visaComplexity": {
+    "score": 5,
+    "note": "Post-Brexit, plus complexe pour UE. Global Talent Visa accessible pour tech/science, Innovator Founder Visa pour startups avec scaling plan, Skilled Worker visa classique.",
+    "entrepreneurPaths": [
+      "Innovator Founder Visa (remplace Tier 1 Entrepreneur)",
+      "Global Talent Visa",
+      "High Potential Individual Visa (diplômés top universities)",
+      "Scale-up Visa"
+    ]
+  },
+
+  "costOfLiving_London_2026_GBP": {
+    "rent_1br_zone1_monthly": 2800,
+    "rent_1br_zone2_3_monthly": 1900,
+    "rent_2br_zone1_monthly": 4200,
+    "rent_2br_zone2_3_monthly": 2800,
+    "groceries_single_monthly": 300,
+    "restaurant_midrange_2pax": 80,
+    "utilities_monthly": 180,
+    "internet_monthly": 35,
+    "transit_zone1_2_monthly": 175,
+    "gym_monthly": 70,
+    "privateHealthcare_monthly": 80
+  },
+
+  "costOfLiving_London_2026_EUR_approx": {
+    "rent_1br_zone1_monthly": 3370,
+    "rent_1br_zone2_3_monthly": 2290,
+    "groceries_single_monthly": 361,
+    "note": "Londres ~ même niveau que Paris sur bouffe/transport mais loyers significativement plus élevés"
+  },
+
+  "infrastructureScore": {
+    "internet": 8,
+    "publicTransport": 9,
+    "banking_foreigners": 7,
+    "coworking": 10,
+    "fintech_ecosystem": 10
+  }
+}
